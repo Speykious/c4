@@ -1,0 +1,10 @@
+If:
+  PathMatch: src/.*
+
+CompileFlags:
+  Add: [-xc, -Wall, -Werror, -pedantic]
+  Compiler: clang
+
+Diagnostics:
+  ClangTidy:
+    Add: [modernize*]

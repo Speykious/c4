@@ -1,0 +1,21 @@
+BasedOnStyle: Google
+---
+Language: Cpp
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
+ColumnLimit: 120
+AlignConsecutiveAssignments: true
+AlignConsecutiveBitFields: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: true
+AlignTrailingComments: true
+DerivePointerAlignment: false
+PointerAlignment: Left
+IndentCaseLabels: true
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForIndentation
