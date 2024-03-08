@@ -44,6 +44,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const run_step = b.addRunArtifact(cingle);
     b.step("run", "Run for your fucking life.").dependOn(&run_step.step);
+    b.installArtifact(cingle);
 
     zcc.createStep(b, "cdb", targets.toOwnedSlice() catch @panic("OOM"));
 }
