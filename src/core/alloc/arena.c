@@ -16,6 +16,8 @@ Arena arena_init(usize size)
 	return arena;
 }
 
+usize const PAGES_PER_COMMIT = 16;
+
 void* arena_alloc_region(Arena* arena, usize size, usize align)
 {
 	usize const aligned_offset = align_to_usize(arena->curr_offset, align);
@@ -26,7 +28,7 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 	{
         memslice commit_slice = {
             .ptr = arena->buffer + arena->uncommitted_offset,
-            .len = os_page_size() * 16,
+            .len = os_page_size() * PAGES_PER_COMMIT,
         };
 
 		bool const success = os_commit_unchecked(commit_slice);
