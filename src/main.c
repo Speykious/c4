@@ -27,6 +27,5 @@ int main(void)
 	}
 	printf("Success\n");
 
-	sleep(7270);
 	return 0;
 }

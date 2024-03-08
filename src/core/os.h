@@ -1,3 +1,5 @@
+#pragma once
+
 #include "types.h"
 
 /** Get the number of pages available on this system */
