@@ -7,7 +7,7 @@ Arena arena_init(usize size)
 {
 	void* const addr = os_reserve(size);
 
-	Arena arena = {
+	Arena const arena = {
 	    .curr_offset        = 0,
 	    .uncommitted_offset = 0,
 	    .buffer             = (u8*)addr,
@@ -26,10 +26,10 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 	// commit pages we don't have yet
 	if (next_offset >= arena->uncommitted_offset)
 	{
-        memslice commit_slice = {
-            .ptr = arena->buffer + arena->uncommitted_offset,
-            .len = os_page_size() * PAGES_PER_COMMIT,
-        };
+		memslice const commit_slice = {
+		    .ptr = arena->buffer + arena->uncommitted_offset,
+		    .len = os_page_size() * PAGES_PER_COMMIT,
+		};
 
 		bool const success = os_commit_unchecked(commit_slice);
 
@@ -48,7 +48,7 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 
 ArenaCheckpoint arena_checkpoint(Arena* arena)
 {
-	ArenaCheckpoint checkpoint = {
+	ArenaCheckpoint const checkpoint = {
 	    .offset = arena->curr_offset,
 	};
 

@@ -18,8 +18,8 @@ inline usize os_page_size(void)
 
 usize os_total_ram(void)
 {
-	usize pages     = os_pages_count();
-	usize page_size = os_page_size();
+	usize const pages     = os_pages_count();
+	usize const page_size = os_page_size();
 	return pages * page_size;
 }
 
@@ -30,26 +30,26 @@ usize os_addr_space_limit(void)
 	return addr_space_limit.rlim_cur;
 }
 
-void* os_reserve(usize const size)
+void* os_reserve(usize size)
 {
 	return mmap(NULL, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
-void os_release(memslice const slice)
+void os_release(memslice slice)
 {
 	munmap(slice.ptr, slice.len);
 }
 
-inline bool os_commit_unchecked(memslice const slice_aligned)
+inline bool os_commit_unchecked(memslice slice_aligned)
 {
 	return mprotect(slice_aligned.ptr, slice_aligned.len, PROT_READ | PROT_WRITE) == 0;
 }
 
-bool os_commit(memslice const slice)
+bool os_commit(memslice slice)
 {
-	usize page_size = os_page_size();
+	usize const page_size = os_page_size();
 
-	memslice slice_aligned = {
+	memslice const slice_aligned = {
 	    .ptr = (void*)align_to_usize((usize)slice.ptr, page_size),
 	    .len = align_to_usize(slice.len, page_size),
 	};
@@ -57,16 +57,16 @@ bool os_commit(memslice const slice)
 	return os_commit_unchecked(slice_aligned);
 }
 
-inline bool os_uncommit_unchecked(memslice const slice_aligned)
+inline bool os_uncommit_unchecked(memslice slice_aligned)
 {
 	return mprotect(slice_aligned.ptr, slice_aligned.len, PROT_NONE) == 0;
 }
 
-bool os_uncommit(memslice const slice)
+bool os_uncommit(memslice slice)
 {
-	usize page_size = os_page_size();
+	usize const page_size = os_page_size();
 
-	memslice slice_aligned = {
+	memslice const slice_aligned = {
 	    .ptr = (void*)align_to_usize((usize)slice.ptr, page_size),
 	    .len = align_to_usize(slice.len, page_size),
 	};
