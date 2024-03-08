@@ -35,37 +35,41 @@ void* os_reserve(usize const size)
 	return mmap(NULL, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
-void os_release(void* const addr, usize const size)
+void os_release(memslice const slice)
 {
-	munmap(addr, size);
+	munmap(slice.ptr, slice.len);
 }
 
-inline bool os_commit_unchecked(void* const addr_aligned, usize const size_aligned)
+inline bool os_commit_unchecked(memslice const slice_aligned)
 {
-	return mprotect(addr_aligned, size_aligned, PROT_READ | PROT_WRITE) == 0;
+	return mprotect(slice_aligned.ptr, slice_aligned.len, PROT_READ | PROT_WRITE) == 0;
 }
 
-bool os_commit(void* const addr, usize const size)
+bool os_commit(memslice const slice)
 {
 	usize page_size = os_page_size();
 
-	usize size_aligned = align_to_usize(size, page_size);
-	u8*   addr_aligned = (u8*)align_to_usize((usize)addr, page_size);
+	memslice slice_aligned = {
+	    .ptr = (void*)align_to_usize((usize)slice.ptr, page_size),
+	    .len = align_to_usize(slice.len, page_size),
+	};
 
-	return os_commit_unchecked(addr_aligned, size_aligned);
+	return os_commit_unchecked(slice_aligned);
 }
 
-inline bool os_uncommit_unchecked(void* const addr_aligned, usize const size_aligned)
+inline bool os_uncommit_unchecked(memslice const slice_aligned)
 {
-	return mprotect(addr_aligned, size_aligned, PROT_NONE) == 0;
+	return mprotect(slice_aligned.ptr, slice_aligned.len, PROT_NONE) == 0;
 }
 
-bool os_uncommit(void* const addr, usize const size)
+bool os_uncommit(memslice const slice)
 {
 	usize page_size = os_page_size();
 
-	usize size_aligned = align_to_usize(size, page_size);
-	u8*   addr_aligned = (u8*)align_to_usize((usize)addr, page_size);
+	memslice slice_aligned = {
+	    .ptr = (void*)align_to_usize((usize)slice.ptr, page_size),
+	    .len = align_to_usize(slice.len, page_size),
+	};
 
-	return os_uncommit_unchecked(addr_aligned, size_aligned);
+	return os_uncommit_unchecked(slice_aligned);
 }

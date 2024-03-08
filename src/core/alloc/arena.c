@@ -24,18 +24,18 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 	// commit pages we don't have yet
 	if (next_offset >= arena->uncommitted_offset)
 	{
-		usize const commit_size             = os_page_size();
-		usize const next_uncommitted_offset = align_to_usize(next_offset, commit_size);
+        memslice commit_slice = {
+            .ptr = arena->buffer + arena->uncommitted_offset,
+            .len = os_page_size() * 16,
+        };
 
-		u8* const commit_addr = arena->buffer + arena->uncommitted_offset;
-
-		bool const success = os_commit_unchecked(commit_addr, commit_size);
+		bool const success = os_commit_unchecked(commit_slice);
 
 		// probably out of memory
 		if (success == false)
 			return NULL;
 
-		arena->uncommitted_offset = next_uncommitted_offset;
+		arena->uncommitted_offset = align_to_usize(next_offset, commit_slice.len);
 	}
 
 	void* const addr   = arena->buffer + aligned_offset;

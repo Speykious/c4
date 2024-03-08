@@ -29,3 +29,10 @@ typedef int b32;
 #define false 0
 
 #define internal static
+
+typedef struct memslice memslice;
+struct memslice
+{
+	void* ptr;
+	usize len;
+};
