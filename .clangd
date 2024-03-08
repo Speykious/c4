@@ -3,6 +3,7 @@ If:
 
 CompileFlags:
   Add: [-xc, -Wall, -Werror, -pedantic]
+  Remove: [-Wempty-translation-unit]
   Compiler: clang
 
 Diagnostics:
