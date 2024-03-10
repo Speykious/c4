@@ -1,9 +1,10 @@
 If:
-  PathMatch: src/.*
+  PathMatch: src/.*\.h
+  PathExclude: /usr/include/.*\.h
 
 CompileFlags:
-  Add: [-xc, -Wall, -Werror, -pedantic]
-  Remove: [-Wempty-translation-unit]
+  Add: [-xc, -Wall, -Werror, -pedantic, -D_POSIX_C_SOURCE=200809L]
+  Remove: [-Wempty-translation-unit, -Wredefinition]
   Compiler: clang
 
 Diagnostics:

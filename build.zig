@@ -30,6 +30,30 @@ pub fn build(b: *std.build.Builder) void {
     }, &generalCompilerOptions);
     targets.append(cingle_core) catch @panic("OOM");
 
+    const cingle_app = b.addStaticLibrary(.{
+        .name = "cingle-audio",
+        .target = target,
+        .optimize = mode,
+        .link_libc = true,
+    });
+    cingle_app.force_pic = true;
+    cingle_app.addCSourceFiles(&.{
+        "src/app/x11.c",
+    }, &generalCompilerOptions);
+    targets.append(cingle_app) catch @panic("OOM");
+
+    const cingle_audio = b.addStaticLibrary(.{
+        .name = "cingle-audio",
+        .target = target,
+        .optimize = mode,
+        .link_libc = true,
+    });
+    cingle_audio.force_pic = true;
+    cingle_audio.addCSourceFiles(&.{
+        "src/audio/audio.c",
+    }, &generalCompilerOptions);
+    targets.append(cingle_audio) catch @panic("OOM");
+
     const cingle = b.addExecutable(.{
         .name = "cingle",
         .target = target,

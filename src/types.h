@@ -30,9 +30,14 @@ typedef int b32;
 
 #define internal static
 
-typedef struct memslice memslice;
-struct memslice
-{
-	void* ptr;
-	usize len;
-};
+#define DEF_SLICE(T, name) \
+	typedef struct         \
+	{                      \
+		T*    ptr;         \
+		usize len;         \
+	} name
+
+DEF_SLICE(void, memslice);
+DEF_SLICE(u8, String8);
+
+#define out *

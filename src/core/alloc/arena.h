@@ -2,7 +2,7 @@
 
 #include <stdalign.h>
 
-#include "../types.h"
+#include "../../types.h"
 
 typedef struct Arena Arena;
 struct Arena

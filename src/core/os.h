@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "../types.h"
 
 /** Get the number of pages available on this system */
 usize os_pages_count(void);
