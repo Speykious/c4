@@ -16,59 +16,61 @@ pub fn build(b: *std.build.Builder) void {
         "-Wno-missing-field-initializers",
     };
 
-    const cingle_core = b.addStaticLibrary(.{
-        .name = "cingle-core",
+    const c4_core = b.addStaticLibrary(.{
+        .name = "c4-core",
         .target = target,
         .optimize = mode,
         .link_libc = true,
     });
-    cingle_core.force_pic = true;
-    cingle_core.addCSourceFiles(&.{
+    c4_core.force_pic = true;
+    c4_core.addCSourceFiles(&.{
         "src/core/alloc/arena.c",
         "src/core/math.c",
         "src/core/os.c",
     }, &generalCompilerOptions);
-    targets.append(cingle_core) catch @panic("OOM");
+    targets.append(c4_core) catch @panic("OOM");
 
-    const cingle_app = b.addStaticLibrary(.{
-        .name = "cingle-audio",
+    const c4_app = b.addStaticLibrary(.{
+        .name = "c4-app",
         .target = target,
         .optimize = mode,
         .link_libc = true,
     });
-    cingle_app.force_pic = true;
-    cingle_app.addCSourceFiles(&.{
+    c4_app.force_pic = true;
+    c4_app.addCSourceFiles(&.{
         "src/app/x11.c",
     }, &generalCompilerOptions);
-    targets.append(cingle_app) catch @panic("OOM");
+    targets.append(c4_app) catch @panic("OOM");
 
-    const cingle_audio = b.addStaticLibrary(.{
+    const c4_audio = b.addStaticLibrary(.{
         .name = "cingle-audio",
         .target = target,
         .optimize = mode,
         .link_libc = true,
     });
-    cingle_audio.force_pic = true;
-    cingle_audio.addCSourceFiles(&.{
+    c4_audio.force_pic = true;
+    c4_audio.linkSystemLibrary("asound");
+    c4_audio.addCSourceFiles(&.{
         "src/audio/audio.c",
     }, &generalCompilerOptions);
-    targets.append(cingle_audio) catch @panic("OOM");
+    targets.append(c4_audio) catch @panic("OOM");
 
-    const cingle = b.addExecutable(.{
-        .name = "cingle",
+    const c4 = b.addExecutable(.{
+        .name = "c4",
         .target = target,
         .optimize = mode,
         .link_libc = true,
     });
-    cingle.linkLibrary(cingle_core);
-    cingle.addCSourceFiles(&.{
+    c4.linkLibrary(c4_core);
+    c4.linkLibrary(c4_audio);
+    c4.addCSourceFiles(&.{
         "src/main.c",
     }, &generalCompilerOptions);
-    targets.append(cingle) catch @panic("OOM");
+    targets.append(c4) catch @panic("OOM");
 
-    const run_step = b.addRunArtifact(cingle);
+    const run_step = b.addRunArtifact(c4);
     b.step("run", "Run for your fucking life.").dependOn(&run_step.step);
-    b.installArtifact(cingle);
+    b.installArtifact(c4);
 
     zcc.createStep(b, "cdb", targets.toOwnedSlice() catch @panic("OOM"));
 }
