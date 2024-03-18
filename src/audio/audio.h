@@ -20,7 +20,7 @@ typedef struct
 	snd_pcm_t* pcm;
 } AudioContext;
 
-bool audio_open(AudioContext out audio_ctx);
-bool audio_available(AudioContext* audio_ctx);
-void audio_write(AudioContext* audio_ctx, AudioBuffer buffer);
-void audio_close(AudioContext* audio_ctx);
+bool audio_open(AudioContext w_* audio_ctx);
+bool audio_available(AudioContext r_* audio_ctx);
+void audio_write(AudioContext rw_* audio_ctx, AudioBuffer buffer);
+void audio_close(AudioContext rw_* audio_ctx);

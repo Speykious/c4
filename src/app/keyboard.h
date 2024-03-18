@@ -149,7 +149,7 @@ typedef enum
 	NUMPAD_EQUALS,
 	NUMPAD_MULTIPLY,
 	NUMPAD_SUBTRACT,
-} KeyCode;
+} C4_KeyCode;
 
 typedef enum
 {
@@ -157,38 +157,38 @@ typedef enum
 	KEYBOARD_EVENT_KEY_RELEASE,
 	KEYBOARD_EVENT_KEY_REPEAT,
 	KEYBOARD_EVENT_IME_COMMIT,
-} KeyboardEventTag;
+} C4_KeyboardEventTag;
 
 typedef struct
 {
-	KeyCode key_code;
-} KeyboardEventKeyPress;
+	C4_KeyCode key_code;
+} C4_KeyboardEventKeyPress;
 
 typedef struct
 {
-	KeyCode key_code;
-} KeyboardEventKeyRelease;
+	C4_KeyCode key_code;
+} C4_KeyboardEventKeyRelease;
 
 typedef struct
 {
-	KeyCode key_code;
-} KeyboardEventKeyRepeat;
+	C4_KeyCode key_code;
+} C4_KeyboardEventKeyRepeat;
 
 typedef struct
 {
 	String8 content;
-} KeyboardEventImeCommit;
+} C4_KeyboardEventImeCommit;
 
 typedef union
 {
-	KeyboardEventKeyPress   key_press;
-	KeyboardEventKeyRelease key_release;
-	KeyboardEventKeyRepeat  key_repeat;
-	KeyboardEventImeCommit  ime_commit;
-} KeyboardEventKind;
+	C4_KeyboardEventKeyPress   key_press;
+	C4_KeyboardEventKeyRelease key_release;
+	C4_KeyboardEventKeyRepeat  key_repeat;
+	C4_KeyboardEventImeCommit  ime_commit;
+} C4_KeyboardEventKind;
 
 typedef struct
 {
-	KeyboardEventTag  tag;
-	KeyboardEventKind kind;
-} KeyboardEvent;
+	C4_KeyboardEventTag  tag;
+	C4_KeyboardEventKind kind;
+} C4_KeyboardEvent;

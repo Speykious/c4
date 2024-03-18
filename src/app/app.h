@@ -3,34 +3,31 @@
 #include "../types.h"
 #include "keyboard.h"
 
-typedef struct
-{
-	usize raw;
-} WindowHandle;
+typedef struct C4_Window C4_Window;
 
 typedef struct
 {
 	i32 x;
 	i32 y;
-} WindowPos;
+} C4_WindowPos;
 
 typedef struct
 {
 	u32 width;
 	u32 height;
-} WindowSize;
+} C4_WindowSize;
 
 typedef enum
 {
 	WINDOWED   = 0,
 	BORDERLESS = 1,
 	FULLSCREEN = 2,
-} ScreenMode;
+} C4_ScreenMode;
 
 typedef struct
 {
 	usize raw;
-} MonitorHandle;
+} C4_MonitorHandle;
 
 typedef enum
 {
@@ -39,22 +36,22 @@ typedef enum
 	WINDOW_FLAG_MAXIMIZED   = 1 << 2,
 	WINDOW_FLAG_TRANSPARENT = 1 << 3,
 	WINDOW_FLAG_HIGH_DPI    = 1 << 4,
-} WindowFlags;
+} C4_WindowFlags;
 
 typedef struct
 {
-	String8       title;
-	WindowPos     position;
-	WindowSize    size;
-	MonitorHandle monitor;
-	ScreenMode    screen_mode;
-	WindowFlags   flags;
-} WindowOptions;
+	String8          title;
+	C4_WindowPos     position;
+	C4_WindowSize    size;
+	C4_MonitorHandle monitor;
+	C4_ScreenMode    screen_mode;
+	C4_WindowFlags   flags;
+} C4_WindowOptions;
 
 void app_init(void);
 
-bool app_create_window(WindowOptions options, WindowHandle out handle);
-void app_close_window(WindowHandle handle);
+bool app_create_window(C4_WindowOptions options, C4_Window* w_* window);
+void app_close_window(C4_Window* window);
 
 // Event sum type
 
@@ -78,40 +75,40 @@ typedef enum
 
 	FOCUS_IN,
 	FOCUS_OUT,
-} EventTag;
+} C4_EventTag;
 
 typedef struct
 {
-	WindowSize size;
-} EventKindResized;
+	C4_WindowSize size;
+} C4_EventKindResized;
 
 typedef struct
 {
-	WindowPos pos;
-} EventKindMoved;
+	C4_WindowPos pos;
+} C4_EventKindMoved;
 
 typedef struct
 {
-	KeyboardEvent kb_event;
-} EventKindKeyboard;
+	C4_KeyboardEvent kb_event;
+} C4_EventKindKeyboard;
 
 typedef union
 {
-	EventKindResized resized;
-	EventKindMoved   moved;
+	C4_EventKindResized resized;
+	C4_EventKindMoved   moved;
 
 	// EventKindFileDropped          file_dropped;
 	// EventKindFileHovered          file_hovered;
 	// EventKindFileHoveredCancelled file_hovered_cancelled;
 
-} EventKind;
+} C4_EventKind;
 
 typedef struct
 {
 	u64          time;
-	WindowHandle window;
-	EventTag     tag;
-	EventKind    kind;
-} Event;
+	C4_Window*   window;
+	C4_EventTag  tag;
+	C4_EventKind kind;
+} C4_Event;
 
-bool app_poll_event(Event out event);
+bool app_poll_event(C4_Event w_* event);

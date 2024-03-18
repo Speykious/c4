@@ -40,4 +40,8 @@ typedef int b32;
 DEF_SLICE(void, memslice);
 DEF_SLICE(u8, String8);
 
-#define out *
+#define STR(lit) { .ptr = (u8*)(lit), .len = sizeof(lit) }
+
+#define r_  /* readonly */ const
+#define w_  /* writeonly */
+#define rw_ /* readwrite */

@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "types.h"
+#include "app/app.h"
 #include "audio/audio.h"
 #include "core/alloc/arena.h"
 #include "core/os.h"
@@ -19,7 +20,7 @@ int main(void)
 {
 	Arena arena = arena_init(os_total_ram());
 
-	printf("Allocating colors\n");
+	printf("allocating colors\n");
 	for (usize i = 0; i < 1024UL * 1024UL; i++)
 	{
 		Color* color = arena_alloc(&arena, Color);
@@ -28,7 +29,7 @@ int main(void)
 		color->g = 128;
 		color->b = 127;
 	}
-	printf("Success\n");
+	printf("success\n");
 
 	arena_free_all(&arena);
 
@@ -39,7 +40,7 @@ int main(void)
 	AudioContext* audio_ctx = arena_alloc(&arena, AudioContext);
 	if (audio_open(audio_ctx) == false)
 	{
-		fprintf(stderr, "Could not open audio :(\n");
+		fprintf(stderr, "could not open audio :(\n");
 		return 1;
 	}
 
@@ -58,7 +59,36 @@ int main(void)
         audio_write(audio_ctx, audio_buffer);
 	}
 
+    printf("sent frames\n");
 	audio_close(audio_ctx);
 
+    ///////////////////////////////////
+
+    printf("\nopening window\n");
+	app_init();
+
+	u32 const WIDTH  = 1280;
+	u32 const HEIGHT = 720;
+
+	C4_WindowOptions options = {
+	    .flags       = WINDOW_FLAG_RESIZABLE | WINDOW_FLAG_CENTERED | WINDOW_FLAG_TRANSPARENT | WINDOW_FLAG_HIGH_DPI,
+	    .position    = {.x = 0, .y = 0},
+	    .size        = {.width = WIDTH, .height = HEIGHT},
+	    .screen_mode = WINDOWED,
+	    .title       = STR("C4 Window"),
+	};
+
+	C4_Window* window = NULL;
+	if (app_create_window(options, &window) == false)
+	{
+		fprintf(stderr, "Nope, no window\n");
+		return 1;
+	}
+
+    printf("  waiting for no reason\n");
+    sleep(1);
+
+    printf("closing window\n");
+	app_close_window(window);
 	return 0;
 }

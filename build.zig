@@ -37,6 +37,7 @@ pub fn build(b: *std.build.Builder) void {
         .link_libc = true,
     });
     c4_app.force_pic = true;
+    c4_app.linkSystemLibrary("X11");
     c4_app.addCSourceFiles(&.{
         "src/app/x11.c",
     }, &generalCompilerOptions);
@@ -62,6 +63,7 @@ pub fn build(b: *std.build.Builder) void {
         .link_libc = true,
     });
     c4.linkLibrary(c4_core);
+    c4.linkLibrary(c4_app);
     c4.linkLibrary(c4_audio);
     c4.addCSourceFiles(&.{
         "src/main.c",
