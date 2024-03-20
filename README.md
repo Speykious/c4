@@ -10,6 +10,33 @@ I'll keep [notes](/notes.md) about my experience coding it as I go.
 
 I barely have the start of a platform layer. This is gonna take a while.
 
+- [ ] platform layer
+  - [x] allocators
+    - [x] arena
+  - [x] allocating virtual memory
+  - [ ] windowing (Linux, X11)
+  - [ ] audio (Linux, ALSA)
+    - how's the audio latency??
+  - [ ] graphics (framebuffer)
+
+- [ ] audio
+  - [ ] audio mixer
+  - [ ] FFT analyzer (optional)
+  - [ ] audio spectrum (optional)
+
+- [ ] graphics (2D)
+  - [ ] text rendering
+  - [ ] simple shapes
+  - [ ] images
+
+- [ ] game (bruh)
+  - [ ] separate threads (rendering, input, update, audio)
+  - [ ] rendering: simple sprites
+  - [ ] game mechanics (basic 4k vsrg)
+    - [ ] slap music on top of it
+  - [ ] simple immediate-mode UI
+  - [ ] chart file format
+
 ## License
 
 This project is licensed under the [MIT license](/LICENSE).
