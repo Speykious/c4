@@ -5,12 +5,12 @@
 
 Arena arena_init(usize size)
 {
-	void* const addr = os_reserve(size);
+	memslice const buffer = os_reserve(size);
 
 	Arena const arena = {
 	    .curr_offset        = 0,
 	    .uncommitted_offset = 0,
-	    .buffer             = (u8*)addr,
+	    .buffer             = buffer,
 	};
 
 	return arena;
@@ -27,7 +27,7 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 	if (next_offset >= arena->uncommitted_offset)
 	{
 		memslice const commit_slice = {
-		    .ptr = arena->buffer + arena->uncommitted_offset,
+		    .ptr = arena->buffer.ptr + arena->uncommitted_offset,
 		    .len = os_page_size() * PAGES_PER_COMMIT,
 		};
 
@@ -40,7 +40,7 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 		arena->uncommitted_offset = align_to_usize(next_offset, commit_slice.len);
 	}
 
-	void* const addr   = arena->buffer + aligned_offset;
+	u8* const addr     = arena->buffer.ptr + aligned_offset;
 	arena->curr_offset = next_offset;
 
 	return addr;
@@ -63,4 +63,9 @@ void arena_restore(Arena* arena, ArenaCheckpoint checkpoint)
 void arena_free_all(Arena* arena)
 {
 	arena->curr_offset = 0;
+}
+
+void arena_destroy(Arena* arena)
+{
+	os_release(arena->buffer);
 }

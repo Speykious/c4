@@ -30,9 +30,14 @@ usize os_addr_space_limit(void)
 	return addr_space_limit.rlim_cur;
 }
 
-void* os_reserve(usize size)
+memslice os_reserve(usize size)
 {
-	return mmap(NULL, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	memslice const slice = {
+	    .ptr = mmap(NULL, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0),
+	    .len = size,
+	};
+
+	return slice;
 }
 
 void os_release(memslice slice)

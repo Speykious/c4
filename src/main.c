@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
-#include "types.h"
 #include "app/app.h"
 #include "audio/audio.h"
 #include "core/alloc/arena.h"
 #include "core/os.h"
+#include "types.h"
 
 typedef struct
 {
@@ -56,15 +56,18 @@ int main(void)
 		for (usize i = 0; i < audio_buffer.len; i++)
 			audio_buffer.ptr[i] = rand() & 0xff;
 
-        audio_write(audio_ctx, audio_buffer);
+		audio_write(audio_ctx, audio_buffer);
 	}
 
-    printf("sent frames\n");
+	printf("sent frames\n");
 	audio_close(audio_ctx);
 
-    ///////////////////////////////////
+	arena_free_all(&arena);
+    arena_destroy(&arena);
 
-    printf("\nopening window\n");
+	///////////////////////////////////
+
+	printf("\nopening window\n");
 	app_init();
 
 	u32 const WIDTH  = 1280;
@@ -79,16 +82,17 @@ int main(void)
 	};
 
 	C4_Window* window = NULL;
-	if (app_create_window(options, &window) == false)
+	if (app_open_window(options, &window) == false)
 	{
 		fprintf(stderr, "Nope, no window\n");
 		return 1;
 	}
 
-    printf("  waiting for no reason\n");
-    sleep(1);
+	printf("  waiting for no reason\n");
+	sleep(1);
 
-    printf("closing window\n");
+	printf("closing window\n");
 	app_close_window(window);
+
 	return 0;
 }

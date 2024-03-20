@@ -37,10 +37,10 @@ typedef int b32;
 		usize len;         \
 	} name
 
-DEF_SLICE(void, memslice);
-DEF_SLICE(u8, String8);
+DEF_SLICE(u8, memslice);
+DEF_SLICE(char, String8);
 
-#define STR(lit) { .ptr = (u8*)(lit), .len = sizeof(lit) }
+#define STR(lit) { .ptr = (char*)(lit), .len = sizeof(lit) }
 
 #define r_  /* readonly */ const
 #define w_  /* writeonly */

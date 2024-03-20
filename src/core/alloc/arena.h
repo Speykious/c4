@@ -7,9 +7,9 @@
 typedef struct Arena Arena;
 struct Arena
 {
-	usize     curr_offset;
-	usize     uncommitted_offset;
-	u8* const buffer;
+	usize    curr_offset;
+	usize    uncommitted_offset;
+	memslice buffer;
 };
 
 typedef struct ArenaCheckpoint ArenaCheckpoint;
@@ -27,3 +27,4 @@ ArenaCheckpoint arena_checkpoint(Arena* arena);
 void            arena_restore(Arena* arena, ArenaCheckpoint checkpoint);
 
 void arena_free_all(Arena* arena);
+void arena_destroy(Arena* arena);

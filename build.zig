@@ -14,6 +14,7 @@ pub fn build(b: *std.build.Builder) void {
         "-Werror",
         "-W",
         "-Wno-missing-field-initializers",
+        "-g",
     };
 
     const c4_core = b.addStaticLibrary(.{
@@ -44,7 +45,7 @@ pub fn build(b: *std.build.Builder) void {
     targets.append(c4_app) catch @panic("OOM");
 
     const c4_audio = b.addStaticLibrary(.{
-        .name = "cingle-audio",
+        .name = "c4-audio",
         .target = target,
         .optimize = mode,
         .link_libc = true,

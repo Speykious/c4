@@ -50,7 +50,7 @@ typedef struct
 
 void app_init(void);
 
-bool app_create_window(C4_WindowOptions options, C4_Window* w_* window);
+bool app_open_window(C4_WindowOptions options, C4_Window* w_* window);
 void app_close_window(C4_Window* window);
 
 // Event sum type
