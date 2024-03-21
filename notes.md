@@ -43,3 +43,15 @@ I've encountered two segfaults so far.
 Other than that, I have another quite frustrating thing to share: ALSA has memory leaks that are completely out of my control, and apparently [it's been known for 16 years](https://alsa-devel.alsa-project.narkive.com/n3Pl3SxS/alsa-leaking-memory). (Thank you Valerie for finding this)
 
 I tried to make ASAN ignore these leaks, but so far I failed, both custom attributes and a blacklist seem to just be ignored even for the simplest program. It's a lot of noise to filter out when I'm trying to know if I fucked anything up in my program. If I find a solution later maybe I'll activate ASAN again, but for now I think I'll only use it if I'm not doing anything related to audio.
+
+***
+
+> 2024-03-21
+
+I implemented my own non-generic circular buffer for an event queue system, it was quite refreshingly simple to implement. I think in Rust it would've been something generic and with tons of helper functions I wouldn't need.
+
+Anyways, I've encountered by 3rd and 4th segfaults today.
+
+The first one, for some random reason, triggered when *exiting the `main()` function*. And then it disappeared as fast as it appeared. I have no clue why it happened.
+
+The second one is still not fixed right now because I also have no clue what's going on: it triggers upon calling `XCreateSimpleWindow`. And it was working perfectly fine beforehand. What kind of thing am I doing that warrants such unpredictable behavior??
