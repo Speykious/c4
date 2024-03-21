@@ -15,6 +15,8 @@ I barely have the start of a platform layer. This is gonna take a while.
     - [x] arena
   - [x] allocating virtual memory
   - [ ] windowing (Linux, X11)
+    - [x] open and close windows
+    - [ ] poll events
   - [ ] audio (Linux, ALSA)
     - how's the audio latency??
   - [ ] graphics (framebuffer)

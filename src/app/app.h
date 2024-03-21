@@ -40,7 +40,7 @@ typedef enum
 
 typedef struct
 {
-	String8          title;
+	char*            title;
 	C4_WindowPos     position;
 	C4_WindowSize    size;
 	C4_MonitorHandle monitor;
@@ -48,33 +48,39 @@ typedef struct
 	C4_WindowFlags   flags;
 } C4_WindowOptions;
 
+/** Initializes the global state necessary for window management. */
 void app_init(void);
 
+/** Opens a new window. Returns whether it succeeded in opening it. */
 bool app_open_window(C4_WindowOptions options, C4_Window* w_* window);
+
+/** Closes and frees a window. */
 void app_close_window(C4_Window* window);
 
-// Event sum type
+////////////////////////
+//// Event sum type ////
+////////////////////////
 
 typedef enum
 {
-	RESIZED,
-	MOVED,
+	RESIZED = 1,
+	MOVED   = 2,
 
-	CLOSE_REQUESTED,
-	DESTROYED,
+	CLOSE_REQUESTED = 3,
+	DESTROYED       = 4,
 
 	// FILE_DROPPED,
 	// FILE_HOVERED,
 	// FILE_HOVERED_CANCELLED,
 
-	KEYBOARD,
-	MOUSE,
-	TOUCH,
+	KEYBOARD = 5,
+	MOUSE    = 6,
+	TOUCH    = 7,
 
-	REDRAW,
+	REDRAW = 8,
 
-	FOCUS_IN,
-	FOCUS_OUT,
+	FOCUS_IN  = 9,
+	FOCUS_OUT = 10,
 } C4_EventTag;
 
 typedef struct
@@ -94,8 +100,9 @@ typedef struct
 
 typedef union
 {
-	C4_EventKindResized resized;
-	C4_EventKindMoved   moved;
+	C4_EventKindResized  resized;
+	C4_EventKindMoved    moved;
+	C4_EventKindKeyboard keyboard;
 
 	// EventKindFileDropped          file_dropped;
 	// EventKindFileHovered          file_hovered;
@@ -105,8 +112,7 @@ typedef union
 
 typedef struct
 {
-	u64          time;
-	C4_Window*   window;
+	// C4_Window*   window;
 	C4_EventTag  tag;
 	C4_EventKind kind;
 } C4_Event;

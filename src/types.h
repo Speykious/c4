@@ -48,3 +48,5 @@ DEF_SLICE(char, String8);
 #define r_  /* readonly */ const
 #define w_  /* writeonly */
 #define rw_ /* readwrite */
+
+#define IS_TYPE(obj, type) _Generic(obj, type: 1, default: 0)

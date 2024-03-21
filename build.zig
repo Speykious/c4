@@ -7,15 +7,7 @@ pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardOptimizeOption(.{});
 
-    const generalCompilerOptions = .{
-        "-std=c11",
-        "-pedantic",
-        "-Wall",
-        "-Werror",
-        "-W",
-        "-Wno-missing-field-initializers",
-        "-g",
-    };
+    const generalCompilerOptions = .{ "-std=c11", "-pedantic", "-Wall", "-Werror", "-W", "-Wno-missing-field-initializers", "-g" };
 
     const c4_core = b.addStaticLibrary(.{
         .name = "c4-core",
@@ -63,6 +55,7 @@ pub fn build(b: *std.build.Builder) void {
         .optimize = mode,
         .link_libc = true,
     });
+    // c4.linkSystemLibrary("asan");
     c4.linkLibrary(c4_core);
     c4.linkLibrary(c4_app);
     c4.linkLibrary(c4_audio);
