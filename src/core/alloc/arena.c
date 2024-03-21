@@ -9,7 +9,7 @@ Arena arena_init(usize size)
 
 	Arena const arena = {
 	    .curr_offset        = 0,
-	    .uncommitted_offset = size,
+	    .uncommitted_offset = 0,
 	    .buffer             = buffer,
 	};
 
