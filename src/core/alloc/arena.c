@@ -26,9 +26,14 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 	// commit pages we don't have yet
 	if (next_offset >= arena->uncommitted_offset)
 	{
+		usize len = os_page_size() * PAGES_PER_COMMIT;
+
+		if (arena->uncommitted_offset + len > arena->buffer.len)
+			len = arena->buffer.len - arena->uncommitted_offset;
+
 		memslice const commit_slice = {
 		    .ptr = arena->buffer.ptr + arena->uncommitted_offset,
-		    .len = os_page_size() * PAGES_PER_COMMIT,
+		    .len = len,
 		};
 
 		bool const success = os_commit_unchecked(commit_slice);

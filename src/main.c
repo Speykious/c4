@@ -127,5 +127,6 @@ int main(void)
 	printf("closing window\n");
 	app_close_window(window);
 
+    printf("quitting\n");
 	return 0;
 }
