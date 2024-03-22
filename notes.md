@@ -55,3 +55,13 @@ Anyways, I've encountered by 3rd and 4th segfaults today.
 The first one, for some random reason, triggered when *exiting the `main()` function*. And then it disappeared as fast as it appeared. I have no clue why it happened.
 
 The second one is still not fixed right now because I also have no clue what's going on: it triggers upon calling `XCreateSimpleWindow`. And it was working perfectly fine beforehand. What kind of thing am I doing that warrants such unpredictable behavior??
+
+> 2024-03-22
+
+I fixed both segfaults that happened yesterday. Both of them were caused by a bug in my arena allocator.
+
+For the first one (segfault when calling `XCreateSimpleWindow`), I had a moment of dumb (again) and decided to advance the uncommitted offset of my arena to the space I had reserved. Except I shouldn't have changed anything, because space that is reserved is not supposed to be committed yet, obviously. And I know this because *I fucking wrote that allocator myself a few weeks ago*. So basically, [I introduced a problem for myself in the exact commit that is named after the problem](https://github.com/Speykious/c4/commit/122f612e8934a18e3a37c227dbb0695e7459a1ee#diff-94a9ca73d9c2c356699fc77ff433a55eb1af9190508802b684b337be477fb3b0L11-L13).
+
+The second one (segfault while exiting the `main()` function) had vanished at first, but came back once I had fixed the `XCreateSimpleWindow` issue. I managed to fix it, but by complete guesswork. I was thinking: hold on, I'm only reserving [4 pages of memory](https://github.com/Speykious/c4/blob/9608fd890add6f460ce046ddef38d88a0cc2f1f7/src/app/x11.c#L113)... But I commit memory [by blocks of 16 pages](https://github.com/Speykious/c4/blob/9608fd890add6f460ce046ddef38d88a0cc2f1f7/src/core/alloc/arena.c#L19-L32). Maybe I'm trying to commit memory that I haven't reserved? So instead of trying to confirm that it was what I was doing, I implemented a fix supposing it was the issue, making sure that the memory my arena commits never goes beyond what it has reserved. Welp, [it worked](https://github.com/Speykious/c4/commit/ec37fd1ed44e78419c3dc095b24dcd5e92d2a5d1).
+
+In retrospect it was a really stupid bug. Like of course if I commit more than what I have reserved it's gonna cause problems. It's a *buffer overflow*, just even more lower level or something. But the problems that occur when this bug is in place are definitely not trivial. Like how the fuck does committing memory I haven't reserved result in *libc segfaulting at `_exit()`?* That makes absolutely no sense. And I predict that I'm going to encounter a lot of these kinds of problems in the future, in multiple different ways and manifestations, since I have very little room for providing guarantees for my APIs.
