@@ -7,6 +7,7 @@
 #define XTrue    True
 #define XFalse   False
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -138,6 +139,13 @@ struct C4_Window
 
 void app_init(void)
 {
+	// Prepare locale for IME to work properly
+	setlocale(LC_CTYPE, "");
+	XSetLocaleModifiers("");
+
+	XInitThreads();
+	XrmInitialize();
+
 	_display = XOpenDisplay(NULL);
 	_screen  = DefaultScreen(_display);
 	_arena   = arena_init(4 * os_page_size());
@@ -310,7 +318,7 @@ internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 
 	// reallocating lookup string buffer if it wasn't big enough
 	if (status == XBufferOverflow)
 	{
-		init_or_expand_str_buffer(char_count - _str_buffer.len);
+		init_or_expand_str_buffer(char_count + 1 - text->len);
 
 		{
 			String8 txt = {.ptr = _str_buffer.ptr + _str_cursor, .len = _str_buffer.len - _str_cursor};
@@ -321,6 +329,7 @@ internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 
 	}
 
 	text->len = char_count;
+    text->ptr[char_count] = '\0';
 
 	return keysym;
 }
@@ -375,7 +384,7 @@ internal void process_xevent(XEvent* xevent)
 			{
 				place_ime(window->xic, 0, 0);
 
-				C4_KeyboardEvent kb_event = {.tag = kb_evtag, .kind = {.key_press = keycode}};
+				C4_KeyboardEvent kb_event = {.tag = C4_KEYBOARD_EVENT_IME_COMMIT, .kind = {.ime_commit = text}};
 				C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
 				event_push_back(&_event_circbuf, &result);
 			}

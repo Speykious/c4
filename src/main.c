@@ -123,7 +123,10 @@ int main(void)
 						break;
 				}
 
-				printf("Received event %s |「%s」\n", key_event_str, keycode_display(kev.kind.key_press));
+				bool  is_ime_commit = kev.tag == C4_KEYBOARD_EVENT_IME_COMMIT;
+				char* key_data      = is_ime_commit ? kev.kind.ime_commit.ptr : keycode_display(kev.kind.key_press);
+
+				printf("Received event %s |「%s」\n", key_event_str, key_data);
 
 				if (kev.kind.key_press == C4_KEY_Q)
 					quit = true;
