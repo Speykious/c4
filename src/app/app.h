@@ -93,16 +93,11 @@ typedef struct
 	C4_WindowPos pos;
 } C4_EventKindMoved;
 
-typedef struct
-{
-	C4_KeyboardEvent kb_event;
-} C4_EventKindKeyboard;
-
 typedef union
 {
-	C4_EventKindResized  resized;
-	C4_EventKindMoved    moved;
-	C4_EventKindKeyboard keyboard;
+	C4_EventKindResized resized;
+	C4_EventKindMoved   moved;
+	C4_KeyboardEvent    keyboard;
 
 	// EventKindFileDropped          file_dropped;
 	// EventKindFileHovered          file_hovered;

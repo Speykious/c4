@@ -159,32 +159,12 @@ typedef enum
 	KEYBOARD_EVENT_IME_COMMIT,
 } C4_KeyboardEventTag;
 
-typedef struct
-{
-	C4_KeyCode key_code;
-} C4_KeyboardEventKeyPress;
-
-typedef struct
-{
-	C4_KeyCode key_code;
-} C4_KeyboardEventKeyRelease;
-
-typedef struct
-{
-	C4_KeyCode key_code;
-} C4_KeyboardEventKeyRepeat;
-
-typedef struct
-{
-	String8 content;
-} C4_KeyboardEventImeCommit;
-
 typedef union
 {
-	C4_KeyboardEventKeyPress   key_press;
-	C4_KeyboardEventKeyRelease key_release;
-	C4_KeyboardEventKeyRepeat  key_repeat;
-	C4_KeyboardEventImeCommit  ime_commit;
+	C4_KeyCode key_press;
+	C4_KeyCode key_release;
+	C4_KeyCode key_repeat;
+	String8    ime_commit;
 } C4_KeyboardEventKind;
 
 typedef struct

@@ -225,9 +225,9 @@ internal void process_xevent(XEvent* xevent)
 
 			C4_KeyboardEvent kb_event = {
 			    .tag  = xevent->type == KeyPress ? KEYBOARD_EVENT_KEY_PRESS : KEYBOARD_EVENT_KEY_RELEASE,
-			    .kind = {.key_press = {.key_code = key_event.keycode}}};
+			    .kind = {.key_press = key_event.keycode}};
 
-			C4_Event result = {.tag = KEYBOARD, .kind = {.keyboard = {.kb_event = kb_event}}};
+			C4_Event result = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
 
 			fprintf(stderr, "[X11] pushing key press/release event\n");
 			event_push_back(&_event_circbuf, &result);

@@ -105,12 +105,12 @@ int main(void)
 		{
 			case KEYBOARD:
 			{
-				C4_KeyboardEvent kev = event.kind.keyboard.kb_event;
+				C4_KeyboardEvent kev = event.kind.keyboard;
 
 				printf("Got a key %s event\n", kev.tag == KEYBOARD_EVENT_KEY_PRESS ? "press" : "release");
-				printf("key code: %d\n", kev.kind.key_press.key_code);
+				printf("key code: %d\n", kev.kind.key_press);
 
-				if (kev.kind.key_press.key_code == 24)  // Q
+				if (kev.kind.key_press == 24)  // Q
 					quit = true;
 
 				break;
