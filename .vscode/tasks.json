@@ -4,7 +4,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "zig build install",
+            "command": "zig build --summary all",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
