@@ -1,3 +1,4 @@
+#include <X11/XKBlib.h>
 #include <X11/Xlib.h>
 
 #define XWindow  Window
@@ -88,7 +89,9 @@ internal C4_Window* _first_free_window = NULL;
 DEF_LLIST(C4_Window, C4_WindowLList);
 internal C4_WindowLList _windows = {.head = NULL, .tail = NULL, .count = 0};
 
+// Event handling
 internal EventCircBuf _event_circbuf = {0};
+internal C4_KeyCode   _prev_key      = C4_KEY_UNKNOWN;
 
 ///////////////////
 //// Windowing ////
@@ -111,6 +114,15 @@ void app_init(void)
 	_display = XOpenDisplay(NULL);
 	_screen  = DefaultScreen(_display);
 	_arena   = arena_init(4 * os_page_size());
+
+	// https://linux.die.net/man/3/xkbsetdetectableautorepeat
+	// TLDR: Xkb allows clients to request detectable auto-repeat.
+	// If a client requests and the server supports DetectableAutoRepeat,
+	// Xkb generates KeyRelease events only when the key is physically
+	// released. If DetectableAutoRepeat is not supported or has not been
+	// requested, the server synthesizes a KeyRelease event for each
+	// repeating KeyPress event it generates.
+	XkbSetDetectableAutoRepeat(_display, true, NULL);
 
 	C4_EventSlice event_buffer = {
 	    .ptr = arena_alloc_n(&_arena, C4_Event, 32),
@@ -222,12 +234,29 @@ internal void process_xevent(XEvent* xevent)
 			XKeyEvent key_event = xevent->xkey;
 
 			// TODO: manage keysym instead of throwing keycode
+			C4_KeyCode keycode = key_event.keycode;
 
-			C4_KeyboardEvent kb_event = {
-			    .tag  = xevent->type == KeyPress ? KEYBOARD_EVENT_KEY_PRESS : KEYBOARD_EVENT_KEY_RELEASE,
-			    .kind = {.key_press = key_event.keycode}};
+			C4_KeyboardEventTag kb_event_tag;
+			if (xevent->type == KeyPress)
+			{
+				if (keycode == _prev_key && _prev_key != C4_KEY_UNKNOWN)
+				{
+					kb_event_tag = C4_KEYBOARD_EVENT_KEY_REPEAT;
+				}
+				else
+				{
+					_prev_key    = keycode;
+					kb_event_tag = C4_KEYBOARD_EVENT_KEY_PRESS;
+				}
+			}
+			else
+			{
+				_prev_key    = C4_KEY_UNKNOWN;
+				kb_event_tag = C4_KEYBOARD_EVENT_KEY_RELEASE;
+			}
 
-			C4_Event result = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
+			C4_KeyboardEvent kb_event = {.tag = kb_event_tag, .kind = {.key_press = keycode}};
+			C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
 
 			fprintf(stderr, "[X11] pushing key press/release event\n");
 			event_push_back(&_event_circbuf, &result);

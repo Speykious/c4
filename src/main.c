@@ -107,7 +107,24 @@ int main(void)
 			{
 				C4_KeyboardEvent kev = event.kind.keyboard;
 
-				printf("Got a key %s event\n", kev.tag == KEYBOARD_EVENT_KEY_PRESS ? "press" : "release");
+                char* key_event_str;
+                switch (kev.tag)
+                {
+					case C4_KEYBOARD_EVENT_KEY_PRESS:
+                        key_event_str = "key press";
+                        break;
+					case C4_KEYBOARD_EVENT_KEY_RELEASE:
+                        key_event_str = "key release";
+                        break;
+					case C4_KEYBOARD_EVENT_KEY_REPEAT:
+                        key_event_str = "key repeat";
+                        break;
+					case C4_KEYBOARD_EVENT_IME_COMMIT:
+                        key_event_str = "IME commit";
+                        break;
+				}
+
+				printf("Got %s event\n", key_event_str);
 				printf("key code: %d\n", kev.kind.key_press);
 
 				if (kev.kind.key_press == 24)  // Q
