@@ -56,6 +56,8 @@ The first one, for some random reason, triggered when *exiting the `main()` func
 
 The second one is still not fixed right now because I also have no clue what's going on: it triggers upon calling `XCreateSimpleWindow`. And it was working perfectly fine beforehand. What kind of thing am I doing that warrants such unpredictable behavior??
 
+***
+
 > 2024-03-22
 
 I fixed both segfaults that happened yesterday. Both of them were caused by a bug in my arena allocator.
@@ -65,3 +67,17 @@ For the first one (segfault when calling `XCreateSimpleWindow`), I had a moment 
 The second one (segfault while exiting the `main()` function) had vanished at first, but came back once I had fixed the `XCreateSimpleWindow` issue. I managed to fix it, but by complete guesswork. I was thinking: hold on, I'm only reserving [4 pages of memory](https://github.com/Speykious/c4/blob/9608fd890add6f460ce046ddef38d88a0cc2f1f7/src/app/x11.c#L113)... But I commit memory [by blocks of 16 pages](https://github.com/Speykious/c4/blob/9608fd890add6f460ce046ddef38d88a0cc2f1f7/src/core/alloc/arena.c#L19-L32). Maybe I'm trying to commit memory that I haven't reserved? So instead of trying to confirm that it was what I was doing, I implemented a fix supposing it was the issue, making sure that the memory my arena commits never goes beyond what it has reserved. Welp, [it worked](https://github.com/Speykious/c4/commit/ec37fd1ed44e78419c3dc095b24dcd5e92d2a5d1).
 
 In retrospect it was a really stupid bug. Like of course if I commit more than what I have reserved it's gonna cause problems. It's a *buffer overflow*, just even more lower level or something. But the problems that occur when this bug is in place are definitely not trivial. Like how the fuck does committing memory I haven't reserved result in *libc segfaulting at `_exit()`?* That makes absolutely no sense. And I predict that I'm going to encounter a lot of these kinds of problems in the future, in multiple different ways and manifestations, since I have very little room for providing guarantees for my APIs.
+
+***
+
+For some reason, I had thought that `_first_free_window` was... an old linked list that had stayed there before making my `_windows` linked list. So I removed it, only to realize minutes later that I had misread the name of the variable and it was actually the free list for the windows. I don't know how the fuck I was able to do something so monumentally stupid, but I guess I did.
+
+I'll pretend it never happened though. Thankfully I didn't commit that. (Well I did, but I force-pushed after the fact.) :p
+
+***
+
+I encountered 2 other segfaults today, so they are my 5th and 6th. The more I code, the closer it feels to coding in Java at my job where the same lack of null safety is present. Only this time I don't try to check for null everywhere because I'd rather have a crash than to handle something I don't know how to handle yet. Still, I *will not stop complaining* about this lack of null safety. You may say these errors are trivial to fix (and so far they have been), I say they're trivial to *not have in the first place* when you have a decent type system with optional types.
+
+In any case, I switched from running the build command in the terminal to just pressing F5 in VSCode, which automatically runs the program with the debugger. So at least now when it segfaults, it stops execution and goes right to the line of code where it happened, which is really nice.
+
+Anyways, I really want to make my arena allocator more helpful when debugging. Maybe I'll do some research on that next time.
