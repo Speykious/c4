@@ -168,7 +168,7 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 	u32 width      = options.size.width;
 	u32 height     = options.size.height;
 	window->handle = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0,
-	                                     BlackPixel(_display, _screen), WhitePixel(_display, _screen));
+	                                     BlackPixel(_display, _screen), BlackPixel(_display, _screen));
 
 	XStoreName(_display, window->handle, options.title);
 	window->graphic_ctx = XCreateGC(_display, window->handle, 0, 0);
