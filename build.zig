@@ -7,7 +7,13 @@ pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardOptimizeOption(.{});
 
-    const generalCompilerOptions = .{ "-std=c11", "-pedantic", "-Wall", "-Werror", "-W", "-Wno-missing-field-initializers", "-g" };
+    const generalCompilerOptions = .{
+        "-std=c11", "-pedantic", // C11
+        "-Wall", "-Werror", // errors as warnings
+        "-Wno-missing-field-initializers", // additional warnings
+        "-g", // debug
+        // "-fsanitize=address", // ASAN
+    };
 
     const c4_core = b.addStaticLibrary(.{
         .name = "c4-core",
@@ -33,6 +39,7 @@ pub fn build(b: *std.build.Builder) void {
     c4_app.linkSystemLibrary("X11");
     c4_app.addCSourceFiles(&.{
         "src/app/x11.c",
+        "src/app/keycode.c",
     }, &generalCompilerOptions);
     targets.append(c4_app) catch @panic("OOM");
 

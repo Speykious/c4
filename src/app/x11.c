@@ -79,8 +79,8 @@ internal bool event_pop_front(EventCircBuf rw_* event_cb, C4_Event w_* event)
 internal Arena _arena;
 
 // X11
-internal XDisplay* _display = NULL;
-internal i32       _screen  = 0;
+internal XDisplay rw_* _display = NULL;
+internal i32           _screen  = 0;
 
 // Head of the window free list
 internal C4_Window* _first_free_window = NULL;
@@ -91,7 +91,33 @@ internal C4_WindowLList _windows = {.head = NULL, .tail = NULL, .count = 0};
 
 // Event handling
 internal EventCircBuf _event_circbuf = {0};
+internal XIM          _xim           = NULL;
 internal C4_KeyCode   _prev_key      = C4_KEY_UNKNOWN;
+
+// String buffer (for IME events)
+internal String8 _str_buffer = {.ptr = NULL, .len = 0};
+internal usize   _str_cursor = 0;
+
+/** Expand str buffer by `len` elements. This reallocates it. */
+internal void init_or_expand_str_buffer(usize len)
+{
+	if (_str_buffer.ptr == NULL)
+	{
+		_str_buffer.ptr = calloc(len, sizeof(char));
+	}
+	else
+	{
+		_str_buffer.ptr = realloc(_str_buffer.ptr, _str_buffer.len + len);
+		memset(_str_buffer.ptr + _str_buffer.len, 0, len);
+	}
+
+	_str_buffer.len += len;
+}
+
+internal void reset_str_buffer(void)
+{
+	_str_cursor = 0;
+}
 
 ///////////////////
 //// Windowing ////
@@ -107,6 +133,7 @@ struct C4_Window
 
 	XWindow handle;
 	GC      graphic_ctx;
+	XIC     xic;
 };
 
 void app_init(void)
@@ -124,12 +151,43 @@ void app_init(void)
 	// repeating KeyPress event it generates.
 	XkbSetDetectableAutoRepeat(_display, true, NULL);
 
+	// Initialize IME
+	_xim = XOpenIM(_display, NULL, NULL, NULL);
+
+	// TODO: check if _xim is null. What do I do for error handling?
+
+	XFlush(_display);
+
 	C4_EventSlice event_buffer = {
 	    .ptr = arena_alloc_n(&_arena, C4_Event, 32),
 	    .len = 32,
 	};
 
 	_event_circbuf = event_circbuf_init(event_buffer);
+
+	init_or_expand_str_buffer(16);
+}
+
+internal void place_ime(XIC xic, i16 x, i16 y)
+{
+	XPoint        place        = {.x = x, .y = y};
+	XVaNestedList preedit_attr = XVaCreateNestedList(0, XNSpotLocation, &place, NULL);
+	XSetICValues(xic, XNPreeditAttributes, preedit_attr, NULL);
+	XFree(preedit_attr);
+}
+
+internal C4_Window rw_* find_window_from_handle(XWindow handle)
+{
+	if (_windows.head == NULL)
+		return NULL;
+
+	for (C4_Window rw_* window = _windows.head; window->next == NULL; window = window->next)
+	{
+		if (window->handle == handle)
+			return window;
+	}
+
+	return NULL;
 }
 
 bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
@@ -177,10 +235,11 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 	}
 
 	// X11: create window
-	u32 width      = options.size.width;
-	u32 height     = options.size.height;
-	window->handle = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0,
+	u32     width  = options.size.width;
+	u32     height = options.size.height;
+	XWindow wandle = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0,
 	                                     BlackPixel(_display, _screen), BlackPixel(_display, _screen));
+	window->handle = wandle;
 
 	XStoreName(_display, window->handle, options.title);
 	window->graphic_ctx = XCreateGC(_display, window->handle, 0, 0);
@@ -192,9 +251,20 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 	                  SubstructureNotifyMask | SubstructureRedirectMask | FocusChangeMask | PropertyChangeMask |
 	                  ColormapChangeMask | OwnerGrabButtonMask;
 
-	XSelectInput(_display, window->handle, event_mask);
+	XSelectInput(_display, wandle, event_mask);
+	XMapWindow(_display, wandle);
 
-	XMapWindow(_display, window->handle);
+	// IME context
+	window->xic = XCreateIC(_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, wandle, NULL);
+
+	// TODO: check if xic is null (error handling?)
+
+	// select IME and position it
+	XSetICFocus(window->xic);
+	place_ime(window->xic, 0, 0);
+
+	XFlush(_display);
+
 	return true;
 }
 
@@ -224,6 +294,37 @@ void app_close_window(C4_Window* window)
 	}
 }
 
+internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 w_* text)
+{
+	XID    keysym = 0;
+	Status status = 0;
+
+	{
+		String8 txt = {.ptr = _str_buffer.ptr + _str_cursor, .len = _str_buffer.len - _str_cursor};
+		*text       = txt;
+	}
+
+	xpress.type    = KeyPress;
+	i32 char_count = Xutf8LookupString(window->xic, &xpress, text->ptr, (int)text->len, &keysym, &status);
+
+	// reallocating lookup string buffer if it wasn't big enough
+	if (status == XBufferOverflow)
+	{
+		init_or_expand_str_buffer(char_count - _str_buffer.len);
+
+		{
+			String8 txt = {.ptr = _str_buffer.ptr + _str_cursor, .len = _str_buffer.len - _str_cursor};
+			*text       = txt;
+		}
+
+		char_count = Xutf8LookupString(window->xic, &xpress, text->ptr, (int)text->len, &keysym, &status);
+	}
+
+	text->len = char_count;
+
+	return keysym;
+}
+
 internal void process_xevent(XEvent* xevent)
 {
 	switch (xevent->type)
@@ -233,33 +334,51 @@ internal void process_xevent(XEvent* xevent)
 		{
 			XKeyEvent key_event = xevent->xkey;
 
-			// TODO: manage keysym instead of throwing keycode
-			C4_KeyCode keycode = key_event.keycode;
+			C4_Window rw_* window = find_window_from_handle(key_event.window);
 
-			C4_KeyboardEventTag kb_event_tag;
+			String8 text   = {0};
+			XID     keysym = utf8_lookup_string(window, key_event, &text);
+
+			C4_KeyCode keycode = keysym_to_keycode(keysym);
+
+			// determine key event tag (press/repeat/release)
+			C4_KeyboardEventTag kb_evtag;
 			if (xevent->type == KeyPress)
 			{
 				if (keycode == _prev_key && _prev_key != C4_KEY_UNKNOWN)
 				{
-					kb_event_tag = C4_KEYBOARD_EVENT_KEY_REPEAT;
+					kb_evtag = C4_KEYBOARD_EVENT_KEY_REPEAT;
 				}
 				else
 				{
-					_prev_key    = keycode;
-					kb_event_tag = C4_KEYBOARD_EVENT_KEY_PRESS;
+					_prev_key = keycode;
+					kb_evtag  = C4_KEYBOARD_EVENT_KEY_PRESS;
 				}
 			}
 			else
 			{
-				_prev_key    = C4_KEY_UNKNOWN;
-				kb_event_tag = C4_KEYBOARD_EVENT_KEY_RELEASE;
+				_prev_key = C4_KEY_UNKNOWN;
+				kb_evtag  = C4_KEYBOARD_EVENT_KEY_RELEASE;
 			}
 
-			C4_KeyboardEvent kb_event = {.tag = kb_event_tag, .kind = {.key_press = keycode}};
-			C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
+			// send key press/repeat/release event
+			{
+				C4_KeyboardEvent kb_event = {.tag = kb_evtag, .kind = {.key_press = keycode}};
+				C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
+				event_push_back(&_event_circbuf, &result);
+			}
 
-			fprintf(stderr, "[X11] pushing key press/release event\n");
-			event_push_back(&_event_circbuf, &result);
+			// Send IME commit only on a non-repeated key press
+			bool do_ime = kb_evtag == C4_KEYBOARD_EVENT_KEY_PRESS;
+
+			if (do_ime && text.len > 0)
+			{
+				place_ime(window->xic, 0, 0);
+
+				C4_KeyboardEvent kb_event = {.tag = kb_evtag, .kind = {.key_press = keycode}};
+				C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
+				event_push_back(&_event_circbuf, &result);
+			}
 			break;
 		}
 
@@ -275,9 +394,10 @@ bool app_poll_event(C4_Event w_* event)
 	if (_windows.count == 0)
 		return false;
 
+	reset_str_buffer();
+
 	while (event_pop_front(&_event_circbuf, event) == false)
 	{
-		fprintf(stderr, "[X11] pending events\n");
 		i32 count = XPending(_display);
 
 		// get all pending events or wait for the next one
@@ -297,6 +417,5 @@ bool app_poll_event(C4_Event w_* event)
 		XFlush(_display);
 	}
 
-	fprintf(stderr, "[X11] returning\n");
 	return true;
 }

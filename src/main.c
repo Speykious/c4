@@ -100,40 +100,39 @@ int main(void)
 	{
 		bool quit = false;
 
-		printf("Received some event | %d\n", event_count++);
 		switch (event.tag)
 		{
 			case KEYBOARD:
 			{
 				C4_KeyboardEvent kev = event.kind.keyboard;
 
-                char* key_event_str;
-                switch (kev.tag)
-                {
+				char* key_event_str;
+				switch (kev.tag)
+				{
 					case C4_KEYBOARD_EVENT_KEY_PRESS:
-                        key_event_str = "key press";
-                        break;
+						key_event_str = "KeyPress  ";
+						break;
 					case C4_KEYBOARD_EVENT_KEY_RELEASE:
-                        key_event_str = "key release";
-                        break;
+						key_event_str = "KeyRelease";
+						break;
 					case C4_KEYBOARD_EVENT_KEY_REPEAT:
-                        key_event_str = "key repeat";
-                        break;
+						key_event_str = "KeyRepeat ";
+						break;
 					case C4_KEYBOARD_EVENT_IME_COMMIT:
-                        key_event_str = "IME commit";
-                        break;
+						key_event_str = "ImeCommit ";
+						break;
 				}
 
-				printf("Got %s event\n", key_event_str);
-				printf("key code: %d\n", kev.kind.key_press);
+				printf("Received event %s |「%s」\n", key_event_str, keycode_display(kev.kind.key_press));
 
-				if (kev.kind.key_press == 24)  // Q
+				if (kev.kind.key_press == C4_KEY_Q)
 					quit = true;
 
 				break;
 			}
 
 			default:
+				printf("Received event (?)        | %d\n", event_count++);
 				break;
 		}
 
@@ -144,6 +143,6 @@ int main(void)
 	printf("closing window\n");
 	app_close_window(window);
 
-    printf("quitting\n");
+	printf("quitting\n");
 	return 0;
 }
