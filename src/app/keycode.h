@@ -1,7 +1,5 @@
 #pragma once
 
-#include <X11/X.h>
-
 typedef enum
 {
     C4_KEY_UNKNOWN,
@@ -149,5 +147,4 @@ typedef enum
 	C4_KEY_NUMPAD_SUBTRACT,
 } C4_KeyCode;
 
-C4_KeyCode keysym_to_keycode(XID keysym);
 char* keycode_display(C4_KeyCode keycode);

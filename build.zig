@@ -38,7 +38,8 @@ pub fn build(b: *std.build.Builder) void {
     c4_app.force_pic = true;
     c4_app.linkSystemLibrary("X11");
     c4_app.addCSourceFiles(&.{
-        "src/app/x11.c",
+        "src/app/x11/x11.c",
+        "src/app/x11/x11_keycode.c",
         "src/app/keycode.c",
     }, &generalCompilerOptions);
     targets.append(c4_app) catch @panic("OOM");

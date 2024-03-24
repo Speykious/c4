@@ -12,12 +12,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../core/alloc/arena.h"
-#include "../core/data_structures/llist.h"
-#include "../core/math.h"
-#include "../core/os.h"
-#include "../types.h"
-#include "app.h"
+#include "x11_keycode.h"
+#include "../../core/alloc/arena.h"
+#include "../../core/data_structures/llist.h"
+#include "../../core/math.h"
+#include "../../core/os.h"
+#include "../../types.h"
+#include "../app.h"
 
 /////////////////////////////
 //// Event circle buffer ////
@@ -334,6 +335,7 @@ internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 
 	return keysym;
 }
 
+internal u32 _event_counter = 0;
 internal void process_xevent(XEvent* xevent)
 {
 	switch (xevent->type)
@@ -394,6 +396,7 @@ internal void process_xevent(XEvent* xevent)
 			// TODO: manage other events
 
 		default:
+            printf("Other event %d\n", _event_counter++);
 			break;
 	}
 }
