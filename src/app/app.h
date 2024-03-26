@@ -11,11 +11,15 @@ typedef struct
 	i32 y;
 } C4_WindowPos;
 
+#define WINDOW_POS_EQ(a, b) (a.x == b.x && a.y == b.y)
+
 typedef struct
 {
 	u32 width;
 	u32 height;
 } C4_WindowSize;
+
+#define WINDOW_SIZE_EQ(a, b) (a.width == b.width && a.height == b.height)
 
 typedef enum
 {
@@ -55,32 +59,32 @@ void app_init(void);
 bool app_open_window(C4_WindowOptions options, C4_Window* w_* window);
 
 /** Closes and frees a window. */
-void app_close_window(C4_Window* window);
+void app_close_window(C4_Window rw_* window);
 
 ////////////////////////
-//// Event sum type ////
+//// Event handling ////
 ////////////////////////
 
 typedef enum
 {
-	RESIZED = 1,
-	MOVED   = 2,
+	C4_EVENT_RESIZED = 1,
+	C4_EVENT_MOVED   = 2,
 
-	CLOSE_REQUESTED = 3,
-	DESTROYED       = 4,
+	C4_EVENT_CLOSE_REQUESTED = 3,
+	C4_EVENT_DESTROYED       = 4,
 
-	// FILE_DROPPED,
-	// FILE_HOVERED,
-	// FILE_HOVERED_CANCELLED,
+	// C4_EVENT_FILE_DROPPED,
+	// C4_EVENT_FILE_HOVERED,
+	// C4_EVENT_FILE_HOVERED_CANCELLED,
 
-	KEYBOARD = 5,
-	MOUSE    = 6,
-	TOUCH    = 7,
+	C4_EVENT_KEYBOARD = 5,
+	C4_EVENT_MOUSE    = 6,
+	C4_EVENT_TOUCH    = 7,
 
-	REDRAW = 8,
+	C4_EVENT_REDRAW = 8,
 
-	FOCUS_IN  = 9,
-	FOCUS_OUT = 10,
+	C4_EVENT_FOCUS_IN  = 9,
+	C4_EVENT_FOCUS_OUT = 10,
 } C4_EventTag;
 
 typedef struct
@@ -107,9 +111,26 @@ typedef union
 
 typedef struct
 {
-	// C4_Window*   window;
+	C4_Window*   window;
 	C4_EventTag  tag;
 	C4_EventKind kind;
 } C4_Event;
 
 bool app_poll_event(C4_Event w_* event);
+
+//////////////////
+//// Graphics ////
+//////////////////
+
+typedef u32 Pixel;
+
+typedef struct
+{
+	Pixel* ptr;
+	u32    width;
+	u32    height;
+} Framebuffer;
+
+/** Get the framebuffer for the next frame. Its lifetime, obviously, is one of a single frame. */
+Framebuffer app_get_next_framebuffer(C4_Window rw_* window);
+void        app_commit_framebuffer(C4_Window rw_* window);

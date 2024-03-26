@@ -102,7 +102,7 @@ int main(void)
 
 		switch (event.tag)
 		{
-			case KEYBOARD:
+			case C4_EVENT_KEYBOARD:
 			{
 				C4_KeyboardEvent kev = event.kind.keyboard;
 
@@ -134,10 +134,30 @@ int main(void)
 				break;
 			}
 
+			case C4_EVENT_MOVED:
+			{
+				C4_EventKindMoved mev = event.kind.moved;
+				printf("Window moved to (%d, %d)\n", mev.pos.x, mev.pos.y);
+				break;
+			}
+
+			case C4_EVENT_RESIZED:
+			{
+				C4_EventKindResized rev = event.kind.resized;
+				printf("Window resized to (%d, %d)\n", rev.size.width, rev.size.height);
+				break;
+			}
+
 			default:
 				printf("Received event (?)        | %d\n", event_count++);
 				break;
 		}
+
+		if (event.window != NULL)
+        {
+            printf("committing framebuffer\n");
+			app_commit_framebuffer(event.window);
+        }
 
 		if (quit)
 			break;

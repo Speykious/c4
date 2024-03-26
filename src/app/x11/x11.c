@@ -1,5 +1,6 @@
 #include <X11/XKBlib.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 #define XWindow  Window
 #define XDisplay Display
@@ -12,13 +13,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "x11_keycode.h"
 #include "../../core/alloc/arena.h"
 #include "../../core/data_structures/llist.h"
 #include "../../core/math.h"
 #include "../../core/os.h"
 #include "../../types.h"
 #include "../app.h"
+#include "x11_keycode.h"
 
 /////////////////////////////
 //// Event circle buffer ////
@@ -35,6 +36,8 @@ typedef struct
 	usize     count;
 } EventCircBuf;
 
+internal EventCircBuf _event_circbuf = {0};
+
 internal EventCircBuf event_circbuf_init(C4_EventSlice buffer)
 {
 	EventCircBuf circbuf = {
@@ -48,28 +51,28 @@ internal EventCircBuf event_circbuf_init(C4_EventSlice buffer)
 	return circbuf;
 }
 
-internal bool event_push_back(EventCircBuf rw_* event_cb, C4_Event r_* event)
+internal bool event_push_back(C4_Event r_* event)
 {
-	if (event_cb->count == event_cb->capacity)
+	if (_event_circbuf.count == _event_circbuf.capacity)
 		return false;
 
-	event_cb->ptr[event_cb->tail] = *event;
+	_event_circbuf.ptr[_event_circbuf.tail] = *event;
 
-	event_cb->tail = (event_cb->tail + 1) % event_cb->capacity;
-	event_cb->count++;
+	_event_circbuf.tail = (_event_circbuf.tail + 1) % _event_circbuf.capacity;
+	_event_circbuf.count++;
 
 	return true;
 }
 
-internal bool event_pop_front(EventCircBuf rw_* event_cb, C4_Event w_* event)
+internal bool event_pop_front(C4_Event w_* event)
 {
-	if (event_cb->count == 0)
+	if (_event_circbuf.count == 0)
 		return false;
 
-	*event = event_cb->ptr[event_cb->head];
+	*event = _event_circbuf.ptr[_event_circbuf.head];
 
-	event_cb->head = (event_cb->head + 1) % event_cb->capacity;
-	event_cb->count--;
+	_event_circbuf.head = (_event_circbuf.head + 1) % _event_circbuf.capacity;
+	_event_circbuf.count--;
 
 	return true;
 }
@@ -92,9 +95,8 @@ DEF_LLIST(C4_Window, C4_WindowLList);
 internal C4_WindowLList _windows = {.head = NULL, .tail = NULL, .count = 0};
 
 // Event handling
-internal EventCircBuf _event_circbuf = {0};
-internal XIM          _xim           = NULL;
-internal C4_KeyCode   _prev_key      = C4_KEY_UNKNOWN;
+internal XIM        _xim      = NULL;
+internal C4_KeyCode _prev_key = C4_KEY_UNKNOWN;
 
 // String buffer (for IME events)
 internal String8 _str_buffer = {.ptr = NULL, .len = 0};
@@ -133,8 +135,14 @@ struct C4_Window
 	C4_Window* next;
 	C4_Window* prev;
 
-	XWindow handle;
-	GC      graphic_ctx;
+	C4_WindowPos  pos;
+	C4_WindowSize size;
+
+	Framebuffer framebuffer;
+	XImage*     ximage;
+
+	XWindow xhandle;
+	GC      xgraphic_ctx;
 	XIC     xic;
 };
 
@@ -192,7 +200,7 @@ internal C4_Window rw_* find_window_from_handle(XWindow handle)
 
 	for (C4_Window rw_* window = _windows.head; window->next == NULL; window = window->next)
 	{
-		if (window->handle == handle)
+		if (window->xhandle == handle)
 			return window;
 	}
 
@@ -243,15 +251,29 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 		_windows.tail = window;
 	}
 
-	// X11: create window
-	u32     width  = options.size.width;
-	u32     height = options.size.height;
-	XWindow wandle = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0,
-	                                     BlackPixel(_display, _screen), BlackPixel(_display, _screen));
-	window->handle = wandle;
+	u32 width  = options.size.width;
+	u32 height = options.size.height;
 
-	XStoreName(_display, window->handle, options.title);
-	window->graphic_ctx = XCreateGC(_display, window->handle, 0, 0);
+	C4_WindowPos pos = {.x = 0, .y = 0};
+	window->pos      = pos;
+
+	C4_WindowSize size = {.width = width, .height = height};
+	window->size       = size;
+
+	// allocate framebuffer
+	Pixel*      framebuffer_ptr = malloc((usize)width * (usize)height * sizeof(Pixel));
+	Framebuffer framebuffer     = {.ptr = framebuffer_ptr, .width = width, .height = height};
+	window->framebuffer         = framebuffer;
+
+	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
+	                              width, height, 32, 0);
+
+	// X11: create window
+	XWindow wandle  = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0, 0, 0);
+	window->xhandle = wandle;
+
+	XStoreName(_display, window->xhandle, options.title);
+	window->xgraphic_ctx = XCreateGC(_display, window->xhandle, 0, 0);
 
 	// select literally everything
 	long event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask |
@@ -279,8 +301,17 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 
 void app_close_window(C4_Window* window)
 {
-	XUnmapWindow(_display, window->handle);
-	XFreeGC(_display, window->graphic_ctx);
+	// X11 deallocation
+	XUnmapWindow(_display, window->xhandle);
+	XFreeGC(_display, window->xgraphic_ctx);
+
+	// framebuffer deallocation
+
+	// XDestroyImage also destroys the data it points to for some reason, even though it doesn't allocate that data
+	// itself. So we have to unreference the data to make sure we have control over the allocation of our framebuffer.
+	window->ximage->data = NULL;
+	XDestroyImage(window->ximage);
+	free(window->framebuffer.ptr);
 
 	// pop window out of the open-window linked list
 	{
@@ -302,6 +333,10 @@ void app_close_window(C4_Window* window)
 		_first_free_window = window;
 	}
 }
+
+////////////////////////
+//// Event handling ////
+////////////////////////
 
 internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 w_* text)
 {
@@ -329,13 +364,26 @@ internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 
 		char_count = Xutf8LookupString(window->xic, &xpress, text->ptr, (int)text->len, &keysym, &status);
 	}
 
-	text->len = char_count;
-    text->ptr[char_count] = '\0';
+	text->len             = char_count;
+	text->ptr[char_count] = '\0';
 
 	return keysym;
 }
 
-internal u32 _event_counter = 0;
+internal void resize_framebuffer(C4_Window rw_* window, u32 width, u32 height)
+{
+	window->ximage->data = NULL;
+	XDestroyImage(window->ximage);
+
+	window->framebuffer.ptr    = realloc(window->framebuffer.ptr, (usize)width * (usize)height * sizeof(Pixel));
+	window->framebuffer.width  = width;
+	window->framebuffer.height = height;
+
+	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
+	                              width, height, 32, 0);
+}
+
+internal u32  _event_counter = 0;
 internal void process_xevent(XEvent* xevent)
 {
 	switch (xevent->type)
@@ -375,8 +423,8 @@ internal void process_xevent(XEvent* xevent)
 			// send key press/repeat/release event
 			{
 				C4_KeyboardEvent kb_event = {.tag = kb_evtag, .kind = {.key_press = keycode}};
-				C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
-				event_push_back(&_event_circbuf, &result);
+				C4_Event         result = {.window = window, .tag = C4_EVENT_KEYBOARD, .kind = {.keyboard = kb_event}};
+				event_push_back(&result);
 			}
 
 			// Send IME commit only on a non-repeated key press
@@ -387,16 +435,47 @@ internal void process_xevent(XEvent* xevent)
 				place_ime(window->xic, 0, 0);
 
 				C4_KeyboardEvent kb_event = {.tag = C4_KEYBOARD_EVENT_IME_COMMIT, .kind = {.ime_commit = text}};
-				C4_Event         result   = {.tag = KEYBOARD, .kind = {.keyboard = kb_event}};
-				event_push_back(&_event_circbuf, &result);
+				C4_Event         result = {.window = window, .tag = C4_EVENT_KEYBOARD, .kind = {.keyboard = kb_event}};
+				event_push_back(&result);
 			}
+			break;
+		}
+
+		case ConfigureNotify:
+		{
+			XConfigureEvent configure_event = xevent->xconfigure;
+
+			C4_Window rw_* window = find_window_from_handle(configure_event.window);
+
+			C4_WindowPos pos = {.x = configure_event.x, .y = configure_event.y};
+			if (!WINDOW_POS_EQ(pos, window->pos))
+			{
+				window->pos = pos;
+
+				C4_EventKindMoved moved_event = {.pos = pos};
+				C4_Event          result = {.window = window, .tag = C4_EVENT_MOVED, .kind = {.moved = moved_event}};
+				event_push_back(&result);
+			}
+
+			C4_WindowSize size = {.width = configure_event.width, .height = configure_event.height};
+			if (!WINDOW_SIZE_EQ(size, window->size))
+			{
+				window->size = size;
+
+				resize_framebuffer(window, size.width, size.height);
+
+				C4_EventKindResized resized_event = {.size = size};
+				C4_Event result = {.window = window, .tag = C4_EVENT_RESIZED, .kind = {.resized = resized_event}};
+				event_push_back(&result);
+			}
+
 			break;
 		}
 
 			// TODO: manage other events
 
 		default:
-            printf("Other event %d\n", _event_counter++);
+			printf("Other event %d\n", _event_counter++);
 			break;
 	}
 }
@@ -408,7 +487,7 @@ bool app_poll_event(C4_Event w_* event)
 
 	reset_str_buffer();
 
-	while (event_pop_front(&_event_circbuf, event) == false)
+	while (event_pop_front(event) == false)
 	{
 		i32 count = XPending(_display);
 
@@ -430,4 +509,21 @@ bool app_poll_event(C4_Event w_* event)
 	}
 
 	return true;
+}
+
+//////////////////
+//// Graphics ////
+//////////////////
+
+Framebuffer app_get_next_framebuffer(C4_Window rw_* window)
+{
+	return window->framebuffer;
+}
+
+void app_commit_framebuffer(C4_Window rw_* window)
+{
+	u32 width  = window->framebuffer.width;
+	u32 height = window->framebuffer.height;
+	XPutImage(_display, window->xhandle, window->xgraphic_ctx, window->ximage, 0, 0, 0, 0, width, height);
+    XFlush(_display);
 }
