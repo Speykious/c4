@@ -2,6 +2,7 @@
 
 #include "../math.h"
 #include "../os.h"
+#include "../../../include/sanitizer/asan_interface.h"
 
 Arena arena_init(usize size)
 {
@@ -47,6 +48,7 @@ void* arena_alloc_region(Arena* arena, usize size, usize align)
 
 	u8* const addr     = arena->buffer.ptr + aligned_offset;
 	arena->curr_offset = next_offset;
+    ASAN_UNPOISON_MEMORY_REGION(addr, size);
 
 	return addr;
 }
@@ -67,6 +69,7 @@ void arena_restore(Arena* arena, ArenaCheckpoint checkpoint)
 
 void arena_free_all(Arena* arena)
 {
+    ASAN_POISON_MEMORY_REGION(arena->buffer.ptr, arena->curr_offset);
 	arena->curr_offset = 0;
 }
 

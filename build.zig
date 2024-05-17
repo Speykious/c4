@@ -12,7 +12,7 @@ pub fn build(b: *std.build.Builder) void {
         "-Wall", "-Werror", // errors as warnings
         "-Wno-missing-field-initializers", // additional warnings
         "-g", // debug
-        // "-fsanitize=address", // ASAN
+        "-fsanitize=address", // ASAN
     };
 
     const c4_core = b.addStaticLibrary(.{
@@ -63,7 +63,7 @@ pub fn build(b: *std.build.Builder) void {
         .optimize = mode,
         .link_libc = true,
     });
-    // c4.linkSystemLibrary("asan");
+    c4.linkSystemLibrary("asan");
     c4.linkLibrary(c4_core);
     c4.linkLibrary(c4_app);
     c4.linkLibrary(c4_audio);

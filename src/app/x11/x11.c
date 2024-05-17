@@ -379,6 +379,9 @@ internal void resize_framebuffer(C4_Window rw_* window, u32 width, u32 height)
 	window->framebuffer.width  = width;
 	window->framebuffer.height = height;
 
+	for (u32 i = 0; i < width * height; i++)
+		window->framebuffer.ptr[i] = 0x26292e;
+
 	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
 	                              width, height, 32, 0);
 }
@@ -463,6 +466,9 @@ internal void process_xevent(XEvent* xevent)
 				window->size = size;
 
 				resize_framebuffer(window, size.width, size.height);
+				XClearArea(_display, window->xhandle, 0, 0, size.width, size.height, XFalse);
+				XPutImage(_display, window->xhandle, window->xgraphic_ctx, window->ximage, 0, 0, 0, 0, size.width,
+				          size.height);
 
 				C4_EventKindResized resized_event = {.size = size};
 				C4_Event result = {.window = window, .tag = C4_EVENT_RESIZED, .kind = {.resized = resized_event}};
@@ -524,6 +530,7 @@ void app_commit_framebuffer(C4_Window rw_* window)
 {
 	u32 width  = window->framebuffer.width;
 	u32 height = window->framebuffer.height;
+	XClearArea(_display, window->xhandle, 0, 0, width, height, XFalse);
 	XPutImage(_display, window->xhandle, window->xgraphic_ctx, window->ximage, 0, 0, 0, 0, width, height);
-    XFlush(_display);
+	XFlush(_display);
 }
