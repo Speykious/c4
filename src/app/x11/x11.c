@@ -207,6 +207,25 @@ internal C4_Window rw_* find_window_from_handle(XWindow handle)
 	return NULL;
 }
 
+internal void resize_framebuffer(C4_Window rw_* window, u32 width, u32 height)
+{
+	if (window->ximage != NULL)
+	{
+		window->ximage->data = NULL;
+		XDestroyImage(window->ximage);
+	}
+
+	window->framebuffer.ptr    = realloc(window->framebuffer.ptr, (usize)width * (usize)height * sizeof(Pixel));
+	window->framebuffer.width  = width;
+	window->framebuffer.height = height;
+
+	for (u32 i = 0; i < width * height; i++)
+		window->framebuffer.ptr[i] = 0xcc2244;
+
+	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
+	                              width, height, 32, 0);
+}
+
 bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 {
 	if (_display == NULL)
@@ -261,12 +280,7 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 	window->size       = size;
 
 	// allocate framebuffer
-	Pixel*      framebuffer_ptr = malloc((usize)width * (usize)height * sizeof(Pixel));
-	Framebuffer framebuffer     = {.ptr = framebuffer_ptr, .width = width, .height = height};
-	window->framebuffer         = framebuffer;
-
-	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
-	                              width, height, 32, 0);
+    resize_framebuffer(window, width, height);
 
 	// X11: create window
 	XWindow wandle  = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0, 0, 0);
@@ -377,22 +391,6 @@ internal XID utf8_lookup_string(C4_Window r_* window, XKeyEvent xpress, String8 
 	text->ptr[char_count] = '\0';
 
 	return keysym;
-}
-
-internal void resize_framebuffer(C4_Window rw_* window, u32 width, u32 height)
-{
-	window->ximage->data = NULL;
-	XDestroyImage(window->ximage);
-
-	window->framebuffer.ptr    = realloc(window->framebuffer.ptr, (usize)width * (usize)height * sizeof(Pixel));
-	window->framebuffer.width  = width;
-	window->framebuffer.height = height;
-
-	for (u32 i = 0; i < width * height; i++)
-		window->framebuffer.ptr[i] = 0x26292e;
-
-	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
-	                              width, height, 32, 0);
 }
 
 internal u32  _event_counter = 0;
@@ -539,7 +537,7 @@ void app_commit_framebuffer(C4_Window rw_* window)
 {
 	u32 width  = window->framebuffer.width;
 	u32 height = window->framebuffer.height;
-	XClearArea(_display, window->xhandle, 0, 0, width, height, XFalse);
+
 	XPutImage(_display, window->xhandle, window->xgraphic_ctx, window->ximage, 0, 0, 0, 0, width, height);
 	XFlush(_display);
 }
