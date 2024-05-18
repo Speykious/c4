@@ -276,11 +276,20 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 	window->xgraphic_ctx = XCreateGC(_display, window->xhandle, 0, 0);
 
 	// select literally everything
-	long event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask |
-	                  LeaveWindowMask | PointerMotionMask | PointerMotionHintMask | ButtonMotionMask | KeymapStateMask |
-	                  ExposureMask | VisibilityChangeMask | StructureNotifyMask | ResizeRedirectMask |
-	                  SubstructureNotifyMask | SubstructureRedirectMask | FocusChangeMask | PropertyChangeMask |
-	                  ColormapChangeMask | OwnerGrabButtonMask;
+	long event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | ExposureMask |
+	                  StructureNotifyMask | PropertyChangeMask;
+
+	// masks to potentially look out for:
+	// | KeyPressMask           | KeyReleaseMask
+	// | ButtonPressMask        | ButtonReleaseMask
+	// | EnterWindowMask        | LeaveWindowMask
+	// | PointerMotionMask      | PointerMotionHintMask
+	// | ButtonMotionMask       | KeymapStateMask
+	// | ExposureMask           | VisibilityChangeMask
+	// | StructureNotifyMask    | ResizeRedirectMask
+	// | SubstructureNotifyMask | SubstructureRedirectMask
+	// | FocusChangeMask        | PropertyChangeMask
+	// | ColormapChangeMask     | OwnerGrabButtonMask
 
 	XSelectInput(_display, wandle, event_mask);
 	XMapWindow(_display, wandle);
