@@ -2,6 +2,10 @@
 
 #include "../types.h"
 
+///////////////////////////
+//// Memory management ////
+///////////////////////////
+
 /** Get the number of pages available on this system */
 usize os_pages_count(void);
 
@@ -9,22 +13,22 @@ usize os_pages_count(void);
 usize os_page_size(void);
 
 /** Get total amount of ram available on this system */
-usize os_total_ram(void);
+inline usize os_total_ram(void)
+{
+	return os_pages_count() * os_page_size();
+}
 
 /** Get the maximum amount of VM space we can request on this system */
 usize os_addr_space_limit(void);
 
-memslice os_reserve(usize size);
-void     os_release(memslice slice);
+/** Reserve pages of virtual memory. The size should be page-aligned manually. */
+memslice os_reserve(usize size_aligned);
 
-/** Commit a slice of memory. The address and size should be page-aligned manually. */
-bool os_commit_unchecked(memslice slice_aligned);
+/** Release a slice of virtual memory. The size should be page-aligned manually. */
+void os_release(memslice slice_aligned);
 
-/** Commit a slice of memory. The address and size get automatically page-aligned. */
-bool os_commit(memslice slice);
+/** Commit a slice of virtual memory. The address and size should be page-aligned manually. */
+bool os_commit(memslice slice_aligned);
 
-/** Uncommit a slice of memory. The address and size should be page-aligned manually. */
-bool os_uncommit_unchecked(memslice slice_aligned);
-
-/** Uncommit a slice of memory. The address and size get automatically page-aligned. */
-bool os_uncommit(memslice slice);
+/** Uncommit a slice of virtual memory. The address and size should be page-aligned manually. */
+bool os_uncommit(memslice slice_aligned);

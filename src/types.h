@@ -25,6 +25,8 @@ typedef double f64;
 typedef u8 bool;
 typedef int b32;
 
+typedef void voidfn(void);
+
 #define true  1
 #define false 0
 
@@ -40,7 +42,7 @@ typedef int b32;
 DEF_SLICE(u8, memslice);
 DEF_SLICE(char, String8);
 
-#define STR(lit)                                \
+#define S(lit)                                  \
 	{                                           \
 		.ptr = (char*)(lit), .len = sizeof(lit) \
 	}
@@ -48,5 +50,3 @@ DEF_SLICE(char, String8);
 #define r_  /* readonly */ const
 #define w_  /* writeonly */
 #define rw_ /* readwrite */
-
-#define IS_TYPE(obj, type) _Generic(obj, type: 1, default: 0)
