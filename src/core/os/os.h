@@ -1,6 +1,14 @@
 #pragma once
 
-#include "../types.h"
+#include "../../types.h"
+
+typedef enum
+{
+	LITTLE_ENDIAN = 0,
+	BIG_ENDIAN    = 1,
+} Endianness;
+
+Endianness get_endianness(void);
 
 ///////////////////////////
 //// Memory management ////
@@ -13,7 +21,7 @@ usize os_pages_count(void);
 usize os_page_size(void);
 
 /** Get total amount of ram available on this system */
-inline usize os_total_ram(void)
+static inline usize os_total_ram(void)
 {
 	return os_pages_count() * os_page_size();
 }

@@ -4,9 +4,9 @@
 #include <unistd.h>
 
 #include "app/app.h"
-#include "audio/audio.h"
+// #include "audio/audio.h"
 // #include "core/alloc/arena.h"
-// #include "core/os.h"
+// #include "core/os/os.h"
 #include "types.h"
 
 typedef struct
@@ -48,18 +48,18 @@ int main(void)
 	// audio_buffer.len = 256;
 	// audio_buffer.ptr = arena_alloc_region(&arena, audio_buffer.len, 16);
 
-	// printf("sending frames\n");
-	// for (u32 j = 0; j < 16; j++)
+	// printf("sending audio frames\n");
+	// for (u32 j = 0; j < 64; j++)
 	// {
 	// 	printf("  frame #%d\n", j);
 
 	// 	for (usize i = 0; i < audio_buffer.len; i++)
-	// 		audio_buffer.ptr[i] = rand() & 0xff;
+	// 		audio_buffer.ptr[i] = rand() & 0x7f;
 
 	// 	audio_write(audio_ctx, audio_buffer);
 	// }
 
-	// printf("sent frames\n");
+	// printf("sent audio frames\n");
 	// audio_close(audio_ctx);
 
 	// arena_free_all(&arena);
@@ -154,10 +154,10 @@ int main(void)
 		}
 
 		if (event.window != NULL)
-        {
-            printf("committing framebuffer\n");
+		{
+			printf("committing framebuffer\n");
 			app_commit_framebuffer(event.window);
-        }
+		}
 
 		if (quit)
 			break;

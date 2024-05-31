@@ -16,7 +16,7 @@
 #include "../../core/alloc/arena.h"
 #include "../../core/data_structures/llist.h"
 #include "../../core/math.h"
-#include "../../core/os.h"
+#include "../../core/os/os.h"
 #include "../../types.h"
 #include "../app.h"
 #include "x11_keycode.h"

@@ -2,7 +2,7 @@
 
 #include "../../../include/sanitizer/asan_interface.h"
 #include "../math.h"
-#include "../os.h"
+#include "../os/os.h"
 
 Arena arena_init(usize size)
 {

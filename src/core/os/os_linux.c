@@ -1,4 +1,4 @@
-#include "../../os.h"
+#include "os.h"
 
 #include <sys/mman.h>
 #include <sys/resource.h>

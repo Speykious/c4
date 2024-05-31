@@ -28,7 +28,7 @@ pub fn build(b: *std.Build) void {
             .files = &.{
                 "src/core/alloc/arena.c",
                 "src/core/math.c",
-                "src/core/os.c",
+                "src/core/os/os.c",
             },
             .flags = &generalCompilerOptions,
         });

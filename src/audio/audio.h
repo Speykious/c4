@@ -1,24 +1,20 @@
+#pragma once
+
 #include "../types.h"
-
-// Weirdest shit I've ever seen. Once again StackOverflow saves the day.
-// https://stackoverflow.com/a/43256599
-#ifndef _POSIX_C_SOURCE
-#define __TEMP_POSIX
-#define _POSIX_C_SOURCE 200809L
-#endif
-
-#include <alsa/asoundlib.h>
-
-#ifdef __TEMP_POSIX
-#undef _POSIX_C_SOURCE
-#endif
+#include "../core/context.h"
 
 DEF_SLICE(u8, AudioBuffer);
 
-typedef struct
-{
-	snd_pcm_t* pcm;
-} AudioContext;
+struct AudioContext;
+typedef struct AudioContext AudioContext;
+
+#if OS_WINDOWS
+#error No Windows implementation for audio yet
+#elif OS_LINUX
+#include "audio_linux.h"
+#elif OS_MAC
+#error No MacOS implementation for audio yet
+#endif
 
 bool audio_open(AudioContext w_* audio_ctx);
 bool audio_available(AudioContext r_* audio_ctx);
