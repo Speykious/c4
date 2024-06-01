@@ -13,13 +13,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../core/alloc/arena.h"
-#include "../../core/data_structures/llist.h"
-#include "../../core/math.h"
-#include "../../core/os/os.h"
+#include "../../core/alloc/core_arena.h"
+#include "../../core/data_structures/core_llist.h"
+#include "../../core/core_math.h"
+#include "../../core/os/core_os.h"
 #include "../../types.h"
 #include "../app.h"
-#include "x11_keycode.h"
+#include "app_x11_keycode.h"
 
 /////////////////////////////
 //// Event circle buffer ////

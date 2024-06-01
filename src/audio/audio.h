@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../types.h"
-#include "../core/context.h"
+#include "../core/core_context.h"
 
 DEF_SLICE(u8, AudioBuffer);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../types.h"
-#include "keyboard.h"
+#include "app_keyboard.h"
 
 typedef struct C4_Window C4_Window;
 

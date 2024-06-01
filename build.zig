@@ -26,9 +26,9 @@ pub fn build(b: *std.Build) void {
     {
         c4_core.addCSourceFiles(.{
             .files = &.{
-                "src/core/alloc/arena.c",
-                "src/core/math.c",
-                "src/core/os/os.c",
+                "src/core/alloc/core_arena.c",
+                "src/core/core_math.c",
+                "src/core/os/core_os.c",
             },
             .flags = &generalCompilerOptions,
         });
@@ -46,7 +46,7 @@ pub fn build(b: *std.Build) void {
         c4_app.addCSourceFiles(.{
             .files = &.{
                 "src/app/app.c",
-                "src/app/keycode.c",
+                "src/app/app_keycode.c",
             },
             .flags = &generalCompilerOptions,
         });

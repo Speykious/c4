@@ -1,8 +1,8 @@
-#include "arena.h"
+#include "core_arena.h"
 
 #include "../../../include/sanitizer/asan_interface.h"
-#include "../math.h"
-#include "../os/os.h"
+#include "../core_math.h"
+#include "../os/core_os.h"
 
 Arena arena_init(usize size)
 {

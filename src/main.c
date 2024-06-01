@@ -5,8 +5,8 @@
 
 #include "app/app.h"
 #include "audio/audio.h"
-#include "core/alloc/arena.h"
-#include "core/os/os.h"
+#include "core/alloc/core_arena.h"
+#include "core/os/core_os.h"
 #include "types.h"
 
 int main(void)

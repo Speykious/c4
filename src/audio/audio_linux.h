@@ -1,3 +1,5 @@
+#pragma once
+
 // Weirdest shit I've ever seen. Once again StackOverflow saves the day.
 // https://stackoverflow.com/a/43256599
 #ifndef _POSIX_C_SOURCE

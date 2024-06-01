@@ -1,4 +1,4 @@
-#include "../core/context.h"
+#include "../core/core_context.h"
 
 #if OS_WINDOWS
 #error No Windows implementation the audio layer yet

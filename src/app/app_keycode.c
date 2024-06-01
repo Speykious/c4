@@ -1,4 +1,4 @@
-#include "keycode.h"
+#include "app_keycode.h"
 
 // clang-format off
 char* keycode_display(C4_KeyCode keycode)
