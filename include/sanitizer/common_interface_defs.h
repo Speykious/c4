@@ -1,4 +1,4 @@
-//===-- sanitizer/common_interface_defs.h ---------------------------------===//
+//===-- sanitizer/common_interface_defs.h -----------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //

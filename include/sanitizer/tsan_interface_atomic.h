@@ -1,4 +1,4 @@
-//===-- tsan_interface_atomic.h -------------------------------------------===//
+//===-- tsan_interface_atomic.h ---------------------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //

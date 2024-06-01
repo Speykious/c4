@@ -1,4 +1,4 @@
-//===-- sanitizer/lsan_interface.h ----------------------------------------===//
+//===-- sanitizer/lsan_interface.h ------------------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
