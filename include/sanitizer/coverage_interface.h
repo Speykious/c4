@@ -1,4 +1,4 @@
-//===-- sanitizer/coverage_interface.h --------------------------*- C++ -*-===//
+//===-- sanitizer/coverage_interface.h ------------------------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
