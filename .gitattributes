@@ -1,0 +1,4 @@
+*.h           linguist-language=C
+
+.clang-format linguist-language=YAML
+.clangd       linguist-language=YAML
