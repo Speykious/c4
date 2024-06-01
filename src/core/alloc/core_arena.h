@@ -4,19 +4,17 @@
 
 #include "../../types.h"
 
-typedef struct Arena Arena;
-struct Arena
+typedef struct
 {
 	usize    curr_offset;
 	usize    uncommitted_offset;
 	memslice buffer;
-};
+} Arena;
 
-typedef struct ArenaCheckpoint ArenaCheckpoint;
-struct ArenaCheckpoint
+typedef struct
 {
 	usize const offset;
-};
+} ArenaCheckpoint;
 
 Arena arena_init(usize size);
 void* arena_alloc_region(Arena* arena, usize size, usize align);
