@@ -81,3 +81,13 @@ I encountered 2 other segfaults today, so they are my 5th and 6th. The more I co
 In any case, I switched from running the build command in the terminal to just pressing F5 in VSCode, which automatically runs the program with the debugger. So at least now when it segfaults, it stops execution and goes right to the line of code where it happened, which is really nice.
 
 Anyways, I really want to make my arena allocator more helpful when debugging. Maybe I'll do some research on that next time.
+
+***
+
+> 2024-06-01
+
+Several months of procrastination later, having tangented into a completely different side-project in Rust where I implement [a graphical snake game](https://github.com/Speykious/snaek) almost from scratch along with an immediate-mode GUI framework... I'm back doing little iterations on this project.
+
+In the mean time, Zig updated to version 0.12. It introduced breaking changes that completely halted my compilation. Because I'm using zig-compile-commands as a dependency and that it only supports 0.11, I was blocked. I even tried just getting the compile-commands file and modify it myself so that it can work with 0.12, but I failed as I'm not familiar enough with Zig. Luckily I recently looked at the forks and I saw that the most recent one, bcrist's, had modifications for 0.12. I tested it and it worked! So now I'm on Zig 0.12 after all that trouble.
+
+Follow-up to the ALSA leaks and my inability to tell LSAN to ignore them: turns out that LSAN doesn't know the leaks come from ALSA, because I don't have its debug symbols. It tells me it comes from `<unknown module>` instead. So I tried a `suppr.txt` file with `leak:<unknown module>` and it worked! We're "free" from ALSA's leaks for now.
