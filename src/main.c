@@ -9,31 +9,9 @@
 #include "core/os/os.h"
 #include "types.h"
 
-typedef struct
-{
-	u8 r;
-	u8 g;
-	u8 b;
-} Color;
-
 int main(void)
 {
 	Arena arena = arena_init(os_total_ram());
-
-	// printf("allocating colors\n");
-	// for (usize i = 0; i < 1024UL * 1024UL; i++)
-	// {
-	// 	Color* color = arena_alloc(&arena, Color);
-
-	// 	color->r = 255;
-	// 	color->g = 128;
-	// 	color->b = 127;
-	// }
-	// printf("success\n");
-
-	// arena_free_all(&arena);
-
-	/////////////////////////////////////////////////
 
 	srand(time(NULL));
 
