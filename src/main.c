@@ -4,9 +4,9 @@
 #include <unistd.h>
 
 #include "app/app.h"
-// #include "audio/audio.h"
-// #include "core/alloc/arena.h"
-// #include "core/os/os.h"
+#include "audio/audio.h"
+#include "core/alloc/arena.h"
+#include "core/os/os.h"
 #include "types.h"
 
 typedef struct
@@ -18,7 +18,7 @@ typedef struct
 
 int main(void)
 {
-	// Arena arena = arena_init(os_total_ram());
+	Arena arena = arena_init(os_total_ram());
 
 	// printf("allocating colors\n");
 	// for (usize i = 0; i < 1024UL * 1024UL; i++)
@@ -35,35 +35,35 @@ int main(void)
 
 	/////////////////////////////////////////////////
 
-	// srand(time(NULL));
+	srand(time(NULL));
 
-	// AudioContext* audio_ctx = arena_alloc(&arena, AudioContext);
-	// if (audio_open(audio_ctx) == false)
-	// {
-	// 	fprintf(stderr, "could not open audio :(\n");
-	// 	return 1;
-	// }
+	AudioContext* audio_ctx = arena_alloc(&arena, AudioContext);
+	if (audio_open(audio_ctx) == false)
+	{
+		fprintf(stderr, "could not open audio :(\n");
+		return 1;
+	}
 
-	// AudioBuffer audio_buffer;
-	// audio_buffer.len = 256;
-	// audio_buffer.ptr = arena_alloc_region(&arena, audio_buffer.len, 16);
+	AudioBuffer audio_buffer;
+	audio_buffer.len = 256;
+	audio_buffer.ptr = arena_alloc_region(&arena, audio_buffer.len, 16);
 
-	// printf("sending audio frames\n");
-	// for (u32 j = 0; j < 64; j++)
-	// {
-	// 	printf("  frame #%d\n", j);
+	printf("sending audio frames\n");
+	for (u32 j = 0; j < 64; j++)
+	{
+		printf("  frame #%d\n", j);
 
-	// 	for (usize i = 0; i < audio_buffer.len; i++)
-	// 		audio_buffer.ptr[i] = rand() & 0x7f;
+		for (usize i = 0; i < audio_buffer.len; i++)
+			audio_buffer.ptr[i] = rand() & 0x7f;
 
-	// 	audio_write(audio_ctx, audio_buffer);
-	// }
+		audio_write(audio_ctx, audio_buffer);
+	}
 
-	// printf("sent audio frames\n");
-	// audio_close(audio_ctx);
+	printf("sent audio frames\n");
+	audio_close(audio_ctx);
 
-	// arena_free_all(&arena);
-	// arena_destroy(&arena);
+	arena_free_all(&arena);
+	arena_destroy(&arena);
 
 	///////////////////////////////////
 

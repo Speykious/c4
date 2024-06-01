@@ -3,7 +3,7 @@ If:
   PathExclude: /usr/include/.*\.h
 
 CompileFlags:
-  Add: [-xc, -Wall, -Werror, -pedantic, -D_POSIX_C_SOURCE=200809L]
+  Add: [-xc, -Wall, -Wextra, -pedantic, -D_POSIX_C_SOURCE=200809L]
   Remove: [-Wempty-translation-unit, -Wredefinition]
   Compiler: clang
 
