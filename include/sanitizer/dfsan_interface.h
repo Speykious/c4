@@ -17,6 +17,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint16_t dfsan_label;
 
 /// Stores information associated with a specific label identifier.  A label
@@ -98,5 +102,14 @@ void dfsan_weak_hook_memcmp(void *caller_pc, const void *s1, const void *s2,
 void dfsan_weak_hook_strncmp(void *caller_pc, const char *s1, const char *s2,
                              size_t n, dfsan_label s1_label,
                              dfsan_label s2_label, dfsan_label n_label);
+#ifdef __cplusplus
+}  // extern "C"
+
+template <typename T>
+void dfsan_set_label(dfsan_label label, T &data) {  // NOLINT
+  dfsan_set_label(label, (void *)&data, sizeof(T));
+}
+
+#endif
 
 #endif  // DFSAN_INTERFACE_H
