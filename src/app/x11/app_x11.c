@@ -14,8 +14,8 @@
 #include <string.h>
 
 #include "../../core/alloc/core_arena.h"
-#include "../../core/data_structures/core_llist.h"
 #include "../../core/core_math.h"
+#include "../../core/data_structures/core_llist.h"
 #include "../../core/os/core_os.h"
 #include "../../types.h"
 #include "../app.h"
@@ -215,15 +215,16 @@ internal void resize_framebuffer(C4_Window rw_* window, u32 width, u32 height)
 		XDestroyImage(window->ximage);
 	}
 
-	window->framebuffer.ptr    = realloc(window->framebuffer.ptr, (usize)width * (usize)height * sizeof(Pixel));
+	big_buffer_resize(&window->framebuffer.bigbuf, (usize)width * (usize)height * sizeof(Pixel));
 	window->framebuffer.width  = width;
 	window->framebuffer.height = height;
 
+	Pixel* pixels = (Pixel*)window->framebuffer.bigbuf.buffer.ptr;
 	for (u32 i = 0; i < width * height; i++)
-		window->framebuffer.ptr[i] = 0xcc2244;
+		pixels[i] = 0xcc2244;
 
-	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0, (char*)window->framebuffer.ptr,
-	                              width, height, 32, 0);
+	window->ximage = XCreateImage(_display, DefaultVisual(_display, 0), 24, ZPixmap, 0,
+	                              (char*)window->framebuffer.bigbuf.buffer.ptr, width, height, 32, 0);
 }
 
 bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
@@ -280,7 +281,8 @@ bool app_open_window(C4_WindowOptions options, C4_Window* w_* window_out)
 	window->size       = size;
 
 	// allocate framebuffer
-    resize_framebuffer(window, width, height);
+	window->framebuffer.bigbuf = big_buffer_init(64 * MIB, 0);
+	resize_framebuffer(window, width, height);
 
 	// X11: create window
 	XWindow wandle  = XCreateSimpleWindow(_display, RootWindow(_display, _screen), 0, 0, width, height, 0, 0, 0);
@@ -334,7 +336,7 @@ void app_close_window(C4_Window* window)
 	// itself. So we have to unreference the data to make sure we have control over the allocation of our framebuffer.
 	window->ximage->data = NULL;
 	XDestroyImage(window->ximage);
-	free(window->framebuffer.ptr);
+	big_buffer_destroy(&window->framebuffer.bigbuf);
 
 	// pop window out of the open-window linked list
 	{

@@ -27,6 +27,7 @@ pub fn build(b: *std.Build) void {
         c4_core.addCSourceFiles(.{
             .files = &.{
                 "src/core/alloc/core_arena.c",
+                "src/core/alloc/core_big_buffer.c",
                 "src/core/core_math.c",
                 "src/core/os/core_os.c",
             },

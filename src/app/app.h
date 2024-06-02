@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../core/alloc/core_big_buffer.h"
 #include "../types.h"
 #include "app_keyboard.h"
 
@@ -126,9 +127,9 @@ typedef u32 Pixel;
 
 typedef struct
 {
-	Pixel* ptr;
-	u32    width;
-	u32    height;
+	BigBuffer bigbuf;
+	u32       width;
+	u32       height;
 } Framebuffer;
 
 /** Get the framebuffer for the next frame. Its lifetime, obviously, is one of a single frame. */
