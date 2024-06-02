@@ -1,0 +1,14 @@
+Assembly c4-app
+Type static_lib
+
+IncludedSourceFiles   app.c app_keycode.c
+
+BuildDirectory        ../../.bin
+IntermediateDirectory ../../.int/app
+
+CompilerFlags $SharedCompilerFlags
+Includes      ..
+
+include ../../common.buildvars
+
+AssertWorkingDirectory .

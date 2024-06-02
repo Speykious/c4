@@ -1,0 +1,14 @@
+Assembly c4-core
+Type static_lib
+
+IncludedSourceFiles   core_arena.c core_big_buffer.c core_math.c core_os.c
+
+BuildDirectory        ../../.bin
+IntermediateDirectory ../../.int/core
+
+CompilerFlags $SharedCompilerFlags
+Includes      ..
+
+include ../../common.buildvars
+
+AssertWorkingDirectory .

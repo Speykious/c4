@@ -1,0 +1,25 @@
+Assembly c4
+
+Depends core  src/core
+Depends app   src/app
+Depends audio src/audio
+
+SourceDirectory       src
+BuildDirectory        .bin
+IntermediateDirectory .int/c4
+
+IncludedSourceFiles   main.c
+
+CompilerFlags         $SharedCompilerFlags
+Includes              include
+Libraries             asan asound X11 c4-app c4-audio c4-core
+LibraryDirectories    $BuildDirectory
+
+if run RunAssembly
+
+AssertPlatform Linux
+Platform.Windows.errormessage {
+    No Windows implementation yet
+}
+
+include common.buildvars

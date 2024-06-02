@@ -1,0 +1,4 @@
+WarningFlags          -Wall -Wextra
+WarningFlags_Disabled -Wno-missing-field-initializers
+
+SharedCompilerFlags -std=c11 -pedantic -g -fsanitize=address $WarningFlags $WarningFlags_Disabled

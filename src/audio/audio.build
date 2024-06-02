@@ -1,0 +1,14 @@
+Assembly c4-audio
+Type static_lib
+
+IncludedSourceFiles   audio.c
+
+BuildDirectory        ../../.bin
+IntermediateDirectory ../../.int/audio
+
+CompilerFlags $SharedCompilerFlags
+Includes      ..
+
+include ../../common.buildvars
+
+AssertWorkingDirectory .

@@ -4,7 +4,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "zig build --summary all",
+            "command": "riftbuild",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

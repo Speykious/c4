@@ -1,5 +1,8 @@
 /zig-cache
 /zig-out
 
+/.bin
+/.int
+
 /compile_commands.json
 /.cache
